@@ -135,6 +135,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             print(ex)
         }
 
+
         if (userInfo != null) {
             val jsonObject = JSONObject(gson.toJson(web3Auth.getWeb3AuthResponse()))
             contentTextView.text = jsonObject.toString(4) + "\n Private Key: " + key
@@ -165,7 +166,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         setContentView(R.layout.activity_main)
 
         val options = Web3AuthOptions(
-            context = this,
             clientId = "BFuUqebV5I8Pz5F7a5A2ihW7YVmbv_OHXnHYDv6OltAD5NGr6e-ViNvde3U4BHdn6HvwfkgobhVu4VwC-OSJkik",
             network = Network.SAPPHIRE_DEVNET,
             redirectUrl = Uri.parse("torusapp://org.torusresearch.web3authexample"),
@@ -194,21 +194,23 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
         // Configure Web3Auth
         web3Auth = Web3Auth(
-            options
+            options, this
         )
 
         web3Auth.setResultUrl(intent.data)
 
         // for session response
-        val sessionResponse: CompletableFuture<Void> = web3Auth.initialize()
-        sessionResponse.whenComplete { _, error ->
-            if (error == null) {
-                reRender()
-                println("PrivKey: " + web3Auth.getPrivkey())
-                println("ed25519PrivKey: " + web3Auth.getEd25519PrivKey())
-                println("Web3Auth UserInfo" + web3Auth.getUserInfo())
-            } else {
-                Log.d("MainActivity_Web3Auth", error.message ?: "Something went wrong")
+        if (web3Auth.isSessionIdExists()) {
+            val sessionResponse: CompletableFuture<Void> = web3Auth.initialize()
+            sessionResponse.whenComplete { _, error ->
+                if (error == null) {
+                    reRender()
+                    println("PrivKey: " + web3Auth.getPrivkey())
+                    println("ed25519PrivKey: " + web3Auth.getEd25519PrivKey())
+                    println("Web3Auth UserInfo" + web3Auth.getUserInfo())
+                } else {
+                    Log.d("MainActivity_Web3Auth", error.message ?: "Something went wrong")
+                }
             }
         }
 
