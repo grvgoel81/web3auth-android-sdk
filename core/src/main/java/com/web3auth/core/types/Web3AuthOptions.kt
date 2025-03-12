@@ -13,11 +13,17 @@ data class Web3AuthOptions(
     val useCoreKitKey: Boolean? = false,
     val chainNamespace: ChainNamespace? = ChainNamespace.EIP155,
     val mfaSettings: MfaSettings? = null,
-    val sessionTime: Int? = 86400,
+    val sessionTime: Int? = 30 * 86400,
     var walletSdkUrl: String? = getWalletSdkUrl(buildEnv),
     var dashboardUrl: String? = getDashBoardUrl(buildEnv),
     var originData: Map<String, String>? = null
-)
+) {
+    init {
+        if (dashboardUrl == null) {
+            dashboardUrl = getDashBoardUrl(buildEnv)
+        }
+    }
+}
 
 fun getSdkUrl(buildEnv: BuildEnv?): String {
     val sdkUrl: String = when (buildEnv) {
@@ -56,7 +62,7 @@ fun getWalletSdkUrl(buildEnv: BuildEnv?): String {
 fun getDashBoardUrl(buildEnv: BuildEnv?): String {
     val sdkUrl: String = when (buildEnv) {
         BuildEnv.STAGING -> {
-            "https://staging-account.web3auth.io/$walletAccountConstant"
+            "https://staging-account.web3auth.io/v9/$walletAccountConstant"
         }
 
         BuildEnv.TESTING -> {
@@ -64,7 +70,7 @@ fun getDashBoardUrl(buildEnv: BuildEnv?): String {
         }
 
         else -> {
-            "https://account.web3auth.io/$walletAccountConstant"
+            "https://account.web3auth.io/v9/$walletAccountConstant"
         }
     }
     return sdkUrl

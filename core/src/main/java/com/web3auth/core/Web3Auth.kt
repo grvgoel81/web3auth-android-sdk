@@ -55,7 +55,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     private var web3AuthOption = web3AuthOptions
     private var sessionManager: SessionManager = SessionManager(
         context,
-        web3AuthOptions.sessionTime ?: 600,
+        web3AuthOptions.sessionTime ?: 30 * 86400,
         web3AuthOptions.redirectUrl.toString()
     )
 
@@ -147,11 +147,12 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             existingExtraLoginOptions.login_hint = userInfo?.verifierId
             initParamsJson.put("extraLoginOptions", gson.toJson(existingExtraLoginOptions))
             initParamsJson.put("mfaLevel", MFALevel.MANDATORY.name.lowercase(Locale.ROOT))
-            val loginIdObject = mapOf("loginId" to sessionId)
+            val loginIdObject = mapOf("loginId" to sessionId, "platform" to "android")
             initParamsJson.put(
                 "appState",
                 gson.toJson(loginIdObject).toByteArray(Charsets.UTF_8).toBase64URLString()
             )
+            initParamsJson.put("dappUrl", web3AuthOption.redirectUrl)
             paramMap.put("sessionId", sessionManager.getSessionId())
         }
         paramMap.put("params", initParamsJson)
@@ -172,7 +173,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 val url =
                     Uri.Builder().scheme(sdkUrl.scheme).encodedAuthority(sdkUrl.encodedAuthority)
                         .encodedPath(sdkUrl.encodedPath).appendPath("start").fragment(hash).build()
-                print("url: => $url")
+                //print("url: => $url")
                 val intent = Intent(baseContext, CustomChromeTabsActivity::class.java)
                 intent.putExtra(WEBVIEW_URL, url.toString())
                 baseContext.startActivity(intent)
@@ -255,6 +256,13 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             return
         }
         val b64ParamString = decodeBase64URLString(b64Params).toString(Charsets.UTF_8)
+
+        if (b64ParamString.contains("actionType")) {
+            if (::manageMfaCompletableFuture.isInitialized)
+                manageMfaCompletableFuture.complete(true)
+            return
+        }
+
         val sessionResponse = gson.fromJson(b64ParamString, SessionResponse::class.java)
         val sessionId = sessionResponse.sessionId
 
@@ -294,9 +302,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
 
                                 if (::enableMfaCompletableFuture.isInitialized)
                                     enableMfaCompletableFuture.complete(true)
-
-                                if (::manageMfaCompletableFuture.isInitialized)
-                                    manageMfaCompletableFuture.complete(true)
                             }
                         } else {
                             print(error)
