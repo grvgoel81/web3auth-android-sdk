@@ -22,8 +22,6 @@ import com.web3auth.core.Web3Auth
 import com.web3auth.core.isEmailValid
 import com.web3auth.core.isPhoneNumberValid
 import com.web3auth.core.types.AUTH_CONNECTION
-import com.web3auth.core.types.AuthConnection
-import com.web3auth.core.types.AuthConnectionConfig
 import com.web3auth.core.types.BuildEnv
 import com.web3auth.core.types.ChainConfig
 import com.web3auth.core.types.ChainNamespace
@@ -178,13 +176,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 hashMapOf(
                     "primary" to "#123456",
                     "onPrimary" to "#0000FF"
-                )
-            ),
-            authConnectionConfig = listOf(
-                AuthConnectionConfig(
-                    authConnectionId = "web3auth-auth0-email-passwordless-sapphire-devnet",
-                    authConnection = AuthConnection.JWT,
-                    clientId = "d84f6xvbdV75VTGmHiMWfZLeSPk8M07C"
                 )
             ),
             buildEnv = BuildEnv.TESTING,

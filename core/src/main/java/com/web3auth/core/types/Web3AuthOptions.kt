@@ -11,7 +11,7 @@ data class Web3AuthOptions(
     @Transient var redirectUrl: Uri,
     var sdkUrl: String = getSdkUrl(buildEnv),
     var whiteLabel: WhiteLabelData? = null,
-    val authConnectionConfig: List<AuthConnectionConfig>? = null,
+    val authConnectionConfig: List<AuthConnectionConfig>? = emptyList(),
     val useCoreKitKey: Boolean? = false,
     val chainNamespace: ChainNamespace? = ChainNamespace.EIP155,
     val mfaSettings: MfaSettings? = null,
