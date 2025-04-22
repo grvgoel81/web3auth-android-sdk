@@ -583,8 +583,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
      * @return A CompletableFuture<Void> representing the asynchronous operation.
      */
     fun request(
-        chainId: String,
-        chainConfig: List<ChainsConfig>,
+        chainConfig: ChainsConfig,
         method: String,
         requestParams: JsonArray,
         path: String? = "wallet/request",
@@ -597,10 +596,11 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         if (sessionId.isNotBlank()) {
             val sdkUrl = Uri.parse(web3AuthOption.walletSdkUrl)
             val initOptions = JSONObject(gson.toJson(getInitOptions()))
+            val chainConfigList = arrayListOf(chainConfig)
             initOptions.put(
-                "chains", gson.toJson(chainConfig)
+                "chains", gson.toJson(chainConfigList)
             )
-            initOptions.put("chainId", chainId)
+            initOptions.put("chainId", chainConfig.chainId)
             val paramMap = JSONObject()
             paramMap.put(
                 "options", initOptions
