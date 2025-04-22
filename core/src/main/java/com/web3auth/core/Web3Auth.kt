@@ -73,7 +73,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             redirectUrl = web3AuthOption.redirectUrl.toString(),
             whiteLabel = web3AuthOption.whiteLabel?.let { gson.toJson(it) },
             authConnectionConfig = web3AuthOption.authConnectionConfig?.let { gson.toJson(it) },
-            buildEnv = web3AuthOption.buildEnv?.name?.lowercase(Locale.ROOT),
+            buildEnv = web3AuthOption.authBuildEnv?.name?.lowercase(Locale.ROOT),
             mfaSettings = web3AuthOption.mfaSettings?.let { gson.toJson(it) },
             sessionTime = web3AuthOption.sessionTime,
             originData = web3AuthOption.originData?.let { gson.toJson(it) },
@@ -519,9 +519,9 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
      * @param path The path where the wallet services will be launched. Default value is "wallet".
      * @return A CompletableFuture<Void> representing the asynchronous operation.
      */
-    fun launchWalletServices(
-        chainConfig: List<ChainConfig>,
+    fun showWalletUI(
         chainId: String,
+        chainConfig: List<ChainConfig>,
         path: String? = "wallet",
     ): CompletableFuture<Void> {
         val launchWalletServiceCF: CompletableFuture<Void> = CompletableFuture()
@@ -583,8 +583,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
      * @return A CompletableFuture<Void> representing the asynchronous operation.
      */
     fun request(
-        chainConfig: List<ChainConfig>,
         chainId: String,
+        chainConfig: List<ChainConfig>,
         method: String,
         requestParams: JsonArray,
         path: String? = "wallet/request",

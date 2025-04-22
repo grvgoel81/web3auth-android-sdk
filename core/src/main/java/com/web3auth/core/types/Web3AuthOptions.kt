@@ -7,22 +7,22 @@ import androidx.annotation.Keep
 data class Web3AuthOptions(
     val clientId: String,
     val network: Network,
-    var buildEnv: BuildEnv? = BuildEnv.PRODUCTION,
+    var authBuildEnv: BuildEnv? = BuildEnv.PRODUCTION,
     @Transient var redirectUrl: Uri,
-    var sdkUrl: String = getSdkUrl(buildEnv),
+    var sdkUrl: String = getSdkUrl(authBuildEnv),
     var whiteLabel: WhiteLabelData? = null,
     val authConnectionConfig: List<AuthConnectionConfig>? = emptyList(),
     val useCoreKitKey: Boolean? = false,
     val chainNamespace: ChainNamespace? = ChainNamespace.EIP155,
     val mfaSettings: MfaSettings? = null,
     val sessionTime: Int? = 30 * 86400,
-    var walletSdkUrl: String? = getWalletSdkUrl(buildEnv),
-    var dashboardUrl: String? = getDashboardUrl(buildEnv),
+    var walletSdkUrl: String? = getWalletSdkUrl(authBuildEnv),
+    var dashboardUrl: String? = getDashboardUrl(authBuildEnv),
     var originData: Map<String, String>? = null
 ) {
     init {
         if (dashboardUrl == null) {
-            dashboardUrl = getDashboardUrl(buildEnv)
+            dashboardUrl = getDashboardUrl(authBuildEnv)
         }
     }
 }

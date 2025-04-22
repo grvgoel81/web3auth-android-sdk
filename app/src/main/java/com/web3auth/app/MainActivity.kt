@@ -178,7 +178,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                     "onPrimary" to "#0000FF"
                 )
             ),
-            buildEnv = BuildEnv.TESTING,
+            authBuildEnv = BuildEnv.TESTING,
             sessionTime = 86400,
         )
 
@@ -214,14 +214,15 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
         val launchWalletButton = findViewById<Button>(R.id.launchWalletButton)
         launchWalletButton.setOnClickListener {
-            val launchWalletCompletableFuture = web3Auth.launchWalletServices(
+            val launchWalletCompletableFuture = web3Auth.showWalletUI(
+                chainId = "0x89",
                 chainConfig = listOf(
                     ChainConfig(
                         chainId = "0x89",
                         rpcTarget = "https://1rpc.io/matic",
                         chainNamespace = ChainNamespace.EIP155
                     )
-                ), chainId = "0x89"
+                )
             )
             launchWalletCompletableFuture.whenComplete { _, error ->
                 if (error == null) {
@@ -241,13 +242,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 add("Android")
             }
             val signMsgCompletableFuture = web3Auth.request(
+                chainId = "0x89",
                 chainConfig = listOf(
                     ChainConfig(
                         chainId = "0x89",
                         rpcTarget = "https://polygon-rpc.com/",
                         chainNamespace = ChainNamespace.EIP155
                     )
-                ), chainId = "0x89", "personal_sign", requestParams = params, appState = "web3Auth"
+                ), "personal_sign", requestParams = params, appState = "web3Auth"
             )
             signMsgCompletableFuture.whenComplete { signResult, error ->
                 if (error == null) {
