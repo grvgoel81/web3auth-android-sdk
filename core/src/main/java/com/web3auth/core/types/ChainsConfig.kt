@@ -4,7 +4,7 @@ import androidx.annotation.Keep
 import java.io.Serializable
 
 @Keep
-data class ChainConfig(
+data class ChainsConfig(
     @Keep val chainNamespace: ChainNamespace = ChainNamespace.EIP155,
     @Keep val decimals: Int? = 18,
     @Keep val blockExplorerUrl: String? = null,

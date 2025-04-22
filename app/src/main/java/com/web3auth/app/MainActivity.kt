@@ -22,9 +22,11 @@ import com.web3auth.core.Web3Auth
 import com.web3auth.core.isEmailValid
 import com.web3auth.core.isPhoneNumberValid
 import com.web3auth.core.types.AUTH_CONNECTION
+import com.web3auth.core.types.AuthConnection
+import com.web3auth.core.types.AuthConnectionConfig
 import com.web3auth.core.types.BuildEnv
-import com.web3auth.core.types.ChainConfig
 import com.web3auth.core.types.ChainNamespace
+import com.web3auth.core.types.ChainsConfig
 import com.web3auth.core.types.ExtraLoginOptions
 import com.web3auth.core.types.Language
 import com.web3auth.core.types.LoginParams
@@ -178,6 +180,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                     "onPrimary" to "#0000FF"
                 )
             ),
+            authConnectionConfig = listOf(
+                AuthConnectionConfig(
+                    authConnectionId = "web3auth-auth0-email-passwordless-sapphire-devnet",
+                    authConnection = AuthConnection.JWT,
+                    clientId = "d84f6xvbdV75VTGmHiMWfZLeSPk8M07C"
+                )
+            ),
             authBuildEnv = BuildEnv.TESTING,
             sessionTime = 86400,
         )
@@ -217,7 +226,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             val launchWalletCompletableFuture = web3Auth.showWalletUI(
                 chainId = "0x89",
                 chainConfig = listOf(
-                    ChainConfig(
+                    ChainsConfig(
                         chainId = "0x89",
                         rpcTarget = "https://1rpc.io/matic",
                         chainNamespace = ChainNamespace.EIP155
@@ -244,7 +253,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             val signMsgCompletableFuture = web3Auth.request(
                 chainId = "0x89",
                 chainConfig = listOf(
-                    ChainConfig(
+                    ChainsConfig(
                         chainId = "0x89",
                         rpcTarget = "https://polygon-rpc.com/",
                         chainNamespace = ChainNamespace.EIP155
