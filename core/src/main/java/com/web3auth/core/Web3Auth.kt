@@ -520,8 +520,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
      * @return A CompletableFuture<Void> representing the asynchronous operation.
      */
     fun showWalletUI(
-        chainId: String,
         chainConfig: List<ChainsConfig>,
+        chainId: String,
         path: String? = "wallet",
     ): CompletableFuture<Void> {
         val launchWalletServiceCF: CompletableFuture<Void> = CompletableFuture()

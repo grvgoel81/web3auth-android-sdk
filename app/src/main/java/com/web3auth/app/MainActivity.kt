@@ -21,7 +21,6 @@ import com.google.gson.JsonArray
 import com.web3auth.core.Web3Auth
 import com.web3auth.core.isEmailValid
 import com.web3auth.core.isPhoneNumberValid
-import com.web3auth.core.types.AUTH_CONNECTION
 import com.web3auth.core.types.AuthConnection
 import com.web3auth.core.types.AuthConnectionConfig
 import com.web3auth.core.types.BuildEnv
@@ -45,30 +44,30 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     private lateinit var web3Auth: Web3Auth
 
     private val authConnectionList: List<AuthConnectionLogin> = listOf(
-        AuthConnectionLogin("Google", AUTH_CONNECTION.GOOGLE),
-        AuthConnectionLogin("Facebook", AUTH_CONNECTION.FACEBOOK),
-        AuthConnectionLogin("Twitch", AUTH_CONNECTION.TWITCH),
-        AuthConnectionLogin("Discord", AUTH_CONNECTION.DISCORD),
-        AuthConnectionLogin("Reddit", AUTH_CONNECTION.REDDIT),
-        AuthConnectionLogin("Apple", AUTH_CONNECTION.APPLE),
-        AuthConnectionLogin("Github", AUTH_CONNECTION.GITHUB),
-        AuthConnectionLogin("LinkedIn", AUTH_CONNECTION.LINKEDIN),
-        AuthConnectionLogin("Twitter", AUTH_CONNECTION.TWITTER),
-        AuthConnectionLogin("Line", AUTH_CONNECTION.LINE),
-        AuthConnectionLogin("Hosted Email Passwordless", AUTH_CONNECTION.EMAIL_PASSWORDLESS),
-        AuthConnectionLogin("SMS Passwordless", AUTH_CONNECTION.SMS_PASSWORDLESS),
-        AuthConnectionLogin("JWT", AUTH_CONNECTION.JWT),
-        AuthConnectionLogin("Farcaster", AUTH_CONNECTION.FARCASTER)
+        AuthConnectionLogin("Google", AuthConnection.GOOGLE),
+        AuthConnectionLogin("Facebook", AuthConnection.FACEBOOK),
+        AuthConnectionLogin("Twitch", AuthConnection.TWITCH),
+        AuthConnectionLogin("Discord", AuthConnection.DISCORD),
+        AuthConnectionLogin("Reddit", AuthConnection.REDDIT),
+        AuthConnectionLogin("Apple", AuthConnection.APPLE),
+        AuthConnectionLogin("Github", AuthConnection.GITHUB),
+        AuthConnectionLogin("LinkedIn", AuthConnection.LINKEDIN),
+        AuthConnectionLogin("Twitter", AuthConnection.TWITTER),
+        AuthConnectionLogin("Line", AuthConnection.LINE),
+        AuthConnectionLogin("Hosted Email Passwordless", AuthConnection.EMAIL_PASSWORDLESS),
+        AuthConnectionLogin("SMS Passwordless", AuthConnection.SMS_PASSWORDLESS),
+        AuthConnectionLogin("JWT", AuthConnection.JWT),
+        AuthConnectionLogin("Farcaster", AuthConnection.FARCASTER)
     )
 
-    private var selectedLoginProvider: AUTH_CONNECTION = AUTH_CONNECTION.GOOGLE
+    private var selectedLoginProvider: AuthConnection = AuthConnection.GOOGLE
 
     private val gson = Gson()
 
     private fun signIn() {
         val hintEmailEditText = findViewById<EditText>(R.id.etEmailHint)
         var extraLoginOptions: ExtraLoginOptions? = null
-        if (selectedLoginProvider == AUTH_CONNECTION.EMAIL_PASSWORDLESS) {
+        if (selectedLoginProvider == AuthConnection.EMAIL_PASSWORDLESS) {
             val hintEmail = hintEmailEditText.text.toString()
             if (hintEmail.isBlank() || !hintEmail.isEmailValid()) {
                 Toast.makeText(this, "Please enter a valid Email.", Toast.LENGTH_LONG).show()
@@ -77,7 +76,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             extraLoginOptions = ExtraLoginOptions(login_hint = hintEmail)
         }
 
-        if (selectedLoginProvider == AUTH_CONNECTION.SMS_PASSWORDLESS) {
+        if (selectedLoginProvider == AuthConnection.SMS_PASSWORDLESS) {
             val hintPhNo = hintEmailEditText.text.toString()
             if (hintPhNo.isBlank() || !hintPhNo.isPhoneNumberValid()) {
                 Toast.makeText(this, "Please enter a valid Number.", Toast.LENGTH_LONG).show()
@@ -224,14 +223,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         val launchWalletButton = findViewById<Button>(R.id.launchWalletButton)
         launchWalletButton.setOnClickListener {
             val launchWalletCompletableFuture = web3Auth.showWalletUI(
-                chainId = "0x89",
                 chainConfig = listOf(
                     ChainsConfig(
                         chainId = "0x89",
                         rpcTarget = "https://1rpc.io/matic",
                         chainNamespace = ChainNamespace.EIP155
                     )
-                )
+                ),
+                chainId = "0x89",
             )
             launchWalletCompletableFuture.whenComplete { _, error ->
                 if (error == null) {
@@ -319,13 +318,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
         val hintEmailEditText = findViewById<EditText>(R.id.etEmailHint)
 
-        if (selectedLoginProvider == AUTH_CONNECTION.EMAIL_PASSWORDLESS) {
+        if (selectedLoginProvider == AuthConnection.EMAIL_PASSWORDLESS) {
             hintEmailEditText.hint = "Enter Email"
-        } else if (selectedLoginProvider == AUTH_CONNECTION.SMS_PASSWORDLESS) {
+        } else if (selectedLoginProvider == AuthConnection.SMS_PASSWORDLESS) {
             hintEmailEditText.hint = "Enter Phone Number"
         }
 
-        if (selectedLoginProvider == AUTH_CONNECTION.EMAIL_PASSWORDLESS || selectedLoginProvider == AUTH_CONNECTION.SMS_PASSWORDLESS) {
+        if (selectedLoginProvider == AuthConnection.EMAIL_PASSWORDLESS || selectedLoginProvider == AuthConnection.SMS_PASSWORDLESS) {
             hintEmailEditText.visibility = View.VISIBLE
         } else {
             hintEmailEditText.visibility = View.GONE
