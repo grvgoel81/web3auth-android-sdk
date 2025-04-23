@@ -12,7 +12,7 @@ import com.google.gson.JsonObject
 import com.web3auth.core.api.ApiHelper
 import com.web3auth.core.api.ApiService
 import com.web3auth.core.keystore.KeyStoreManagerUtils
-import com.web3auth.core.types.ChainConfig
+import com.web3auth.core.types.ChainsConfig
 import com.web3auth.core.types.ErrorCode
 import com.web3auth.core.types.ExtraLoginOptions
 import com.web3auth.core.types.InitOptions
@@ -73,7 +73,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             redirectUrl = web3AuthOption.redirectUrl.toString(),
             whiteLabel = web3AuthOption.whiteLabel?.let { gson.toJson(it) },
             authConnectionConfig = web3AuthOption.authConnectionConfig?.let { gson.toJson(it) },
-            buildEnv = web3AuthOption.buildEnv?.name?.lowercase(Locale.ROOT),
+            buildEnv = web3AuthOption.authBuildEnv?.name?.lowercase(Locale.ROOT),
             mfaSettings = web3AuthOption.mfaSettings?.let { gson.toJson(it) },
             sessionTime = web3AuthOption.sessionTime,
             originData = web3AuthOption.originData?.let { gson.toJson(it) },
@@ -519,8 +519,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
      * @param path The path where the wallet services will be launched. Default value is "wallet".
      * @return A CompletableFuture<Void> representing the asynchronous operation.
      */
-    fun launchWalletServices(
-        chainConfig: List<ChainConfig>,
+    fun showWalletUI(
+        chainConfig: List<ChainsConfig>,
         chainId: String,
         path: String? = "wallet",
     ): CompletableFuture<Void> {
@@ -583,8 +583,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
      * @return A CompletableFuture<Void> representing the asynchronous operation.
      */
     fun request(
-        chainConfig: List<ChainConfig>,
-        chainId: String,
+        chainConfig: ChainsConfig,
         method: String,
         requestParams: JsonArray,
         path: String? = "wallet/request",
@@ -597,10 +596,11 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         if (sessionId.isNotBlank()) {
             val sdkUrl = Uri.parse(web3AuthOption.walletSdkUrl)
             val initOptions = JSONObject(gson.toJson(getInitOptions()))
+            val chainConfigList = arrayListOf(chainConfig)
             initOptions.put(
-                "chains", gson.toJson(chainConfig)
+                "chains", gson.toJson(chainConfigList)
             )
-            initOptions.put("chainId", chainId)
+            initOptions.put("chainId", chainConfig.chainId)
             val paramMap = JSONObject()
             paramMap.put(
                 "options", initOptions
