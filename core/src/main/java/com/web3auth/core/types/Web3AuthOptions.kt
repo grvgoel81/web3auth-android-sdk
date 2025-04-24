@@ -6,7 +6,7 @@ import androidx.annotation.Keep
 @Keep
 data class Web3AuthOptions(
     val clientId: String,
-    val network: Network,
+    val web3AuthNetwork: Web3AuthNetwork,
     var authBuildEnv: BuildEnv? = BuildEnv.PRODUCTION,
     @Transient var redirectUrl: Uri,
     var sdkUrl: String = getSdkUrl(authBuildEnv),
