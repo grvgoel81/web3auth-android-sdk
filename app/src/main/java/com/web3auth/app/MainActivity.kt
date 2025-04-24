@@ -24,8 +24,8 @@ import com.web3auth.core.isPhoneNumberValid
 import com.web3auth.core.types.AuthConnection
 import com.web3auth.core.types.AuthConnectionConfig
 import com.web3auth.core.types.BuildEnv
+import com.web3auth.core.types.ChainConfig
 import com.web3auth.core.types.ChainNamespace
-import com.web3auth.core.types.ChainsConfig
 import com.web3auth.core.types.ExtraLoginOptions
 import com.web3auth.core.types.Language
 import com.web3auth.core.types.LoginParams
@@ -224,7 +224,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         launchWalletButton.setOnClickListener {
             val launchWalletCompletableFuture = web3Auth.showWalletUI(
                 chainConfig = listOf(
-                    ChainsConfig(
+                    ChainConfig(
                         chainId = "0x89",
                         rpcTarget = "https://1rpc.io/matic",
                         chainNamespace = ChainNamespace.EIP155
@@ -250,7 +250,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 add("Android")
             }
             val signMsgCompletableFuture = web3Auth.request(
-                chainConfig = ChainsConfig(
+                chainConfig = ChainConfig(
                     chainId = "0x89",
                     rpcTarget = "https://polygon-rpc.com/",
                     chainNamespace = ChainNamespace.EIP155

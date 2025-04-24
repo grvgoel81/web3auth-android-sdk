@@ -12,7 +12,7 @@ import com.google.gson.JsonObject
 import com.web3auth.core.api.ApiHelper
 import com.web3auth.core.api.ApiService
 import com.web3auth.core.keystore.KeyStoreManagerUtils
-import com.web3auth.core.types.ChainsConfig
+import com.web3auth.core.types.ChainConfig
 import com.web3auth.core.types.ErrorCode
 import com.web3auth.core.types.ExtraLoginOptions
 import com.web3auth.core.types.InitOptions
@@ -520,7 +520,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
      * @return A CompletableFuture<Void> representing the asynchronous operation.
      */
     fun showWalletUI(
-        chainConfig: List<ChainsConfig>,
+        chainConfig: List<ChainConfig>,
         chainId: String,
         path: String? = "wallet",
     ): CompletableFuture<Void> {
@@ -583,7 +583,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
      * @return A CompletableFuture<Void> representing the asynchronous operation.
      */
     fun request(
-        chainConfig: ChainsConfig,
+        chainConfig: ChainConfig,
         method: String,
         requestParams: JsonArray,
         path: String? = "wallet/request",
