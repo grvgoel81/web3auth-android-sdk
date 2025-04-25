@@ -12,7 +12,7 @@ import com.google.gson.JsonObject
 import com.web3auth.core.api.ApiHelper
 import com.web3auth.core.api.ApiService
 import com.web3auth.core.keystore.KeyStoreManagerUtils
-import com.web3auth.core.types.ChainsConfig
+import com.web3auth.core.types.ChainConfig
 import com.web3auth.core.types.ErrorCode
 import com.web3auth.core.types.ExtraLoginOptions
 import com.web3auth.core.types.InitOptions
@@ -69,7 +69,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     private fun getInitOptions(): InitOptions {
         return InitOptions(
             clientId = web3AuthOption.clientId,
-            network = web3AuthOption.network.name.lowercase(Locale.ROOT),
+            network = web3AuthOption.web3AuthNetwork.name.lowercase(Locale.ROOT),
             redirectUrl = web3AuthOption.redirectUrl.toString(),
             whiteLabel = web3AuthOption.whiteLabel?.let { gson.toJson(it) },
             authConnectionConfig = web3AuthOption.authConnectionConfig?.let { gson.toJson(it) },
@@ -283,7 +283,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                                 throwLoginError(ErrorCode.SOMETHING_WENT_WRONG)
                                 throwEnableMFAError(ErrorCode.SOMETHING_WENT_WRONG)
                                 throwManageMFAError(ErrorCode.SOMETHING_WENT_WRONG)
-                            } else if (web3AuthResponse?.privKey.isNullOrBlank() && web3AuthResponse?.factorKey.isNullOrBlank()) {
+                            } else if (web3AuthResponse?.privateKey.isNullOrBlank() && web3AuthResponse?.factorKey.isNullOrBlank()) {
                                 throwLoginError(ErrorCode.SOMETHING_WENT_WRONG)
                                 throwEnableMFAError(ErrorCode.SOMETHING_WENT_WRONG)
                                 throwManageMFAError(ErrorCode.SOMETHING_WENT_WRONG)
@@ -431,7 +431,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                             )
                         )
                     )
-                } else if (web3AuthResponse?.privKey.isNullOrBlank() && web3AuthResponse?.factorKey.isNullOrBlank()) {
+                } else if (web3AuthResponse?.privateKey.isNullOrBlank() && web3AuthResponse?.factorKey.isNullOrBlank()) {
                     sessionCompletableFuture.completeExceptionally(
                         Exception(
                             Web3AuthError.getError(ErrorCode.SOMETHING_WENT_WRONG)
@@ -448,7 +448,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     private fun fetchProjectConfig(): CompletableFuture<Boolean> {
         val projectConfigCompletableFuture: CompletableFuture<Boolean> = CompletableFuture()
         val web3AuthApi =
-            ApiHelper.getInstance(web3AuthOption.network.name).create(ApiService::class.java)
+            ApiHelper.getInstance(web3AuthOption.web3AuthNetwork.name)
+                .create(ApiService::class.java)
         if (!ApiHelper.isNetworkAvailable(baseContext)) {
             throw Exception(
                 Web3AuthError.getError(ErrorCode.RUNTIME_ERROR)
@@ -459,7 +460,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             try {
                 val result = web3AuthApi.fetchProjectConfig(
                     web3AuthOption.clientId,
-                    web3AuthOption.network.name.lowercase()
+                    web3AuthOption.web3AuthNetwork.name.lowercase()
                 )
                 if (result.isSuccessful && result.body() != null) {
                     val response = result.body()
@@ -515,12 +516,12 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     /**
      * Launches the wallet services asynchronously.
      *
-     * @param chainConfig The configuration details of the blockchain network.
+     * @param chainConfig The configuration details of the blockchain web3AuthNetwork.
      * @param path The path where the wallet services will be launched. Default value is "wallet".
      * @return A CompletableFuture<Void> representing the asynchronous operation.
      */
     fun showWalletUI(
-        chainConfig: List<ChainsConfig>,
+        chainConfig: List<ChainConfig>,
         chainId: String,
         path: String? = "wallet",
     ): CompletableFuture<Void> {
@@ -576,14 +577,14 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     /**
      * Signs a message asynchronously.
      *
-     * @param chainConfig The configuration details of the blockchain network.
+     * @param chainConfig The configuration details of the blockchain web3AuthNetwork.
      * @param method The method name of the request.
      * @param requestParams The parameters of the request in JSON array format.
      * @param path The path where the signing service is located. Default value is "wallet/request".
      * @return A CompletableFuture<Void> representing the asynchronous operation.
      */
     fun request(
-        chainConfig: ChainsConfig,
+        chainConfig: ChainConfig,
         method: String,
         requestParams: JsonArray,
         path: String? = "wallet/request",
@@ -696,7 +697,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             if (web3AuthOption.useCoreKitKey == true) {
                 web3AuthResponse?.coreKitKey
             } else {
-                web3AuthResponse?.privKey
+                web3AuthResponse?.privateKey
             }
         }
         return privKey

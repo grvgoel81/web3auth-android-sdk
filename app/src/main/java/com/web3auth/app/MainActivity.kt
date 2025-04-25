@@ -24,15 +24,15 @@ import com.web3auth.core.isPhoneNumberValid
 import com.web3auth.core.types.AuthConnection
 import com.web3auth.core.types.AuthConnectionConfig
 import com.web3auth.core.types.BuildEnv
+import com.web3auth.core.types.ChainConfig
 import com.web3auth.core.types.ChainNamespace
-import com.web3auth.core.types.ChainsConfig
 import com.web3auth.core.types.ExtraLoginOptions
 import com.web3auth.core.types.Language
 import com.web3auth.core.types.LoginParams
 import com.web3auth.core.types.MFALevel
-import com.web3auth.core.types.Network
 import com.web3auth.core.types.ThemeModes
 import com.web3auth.core.types.UserInfo
+import com.web3auth.core.types.Web3AuthNetwork
 import com.web3auth.core.types.Web3AuthOptions
 import com.web3auth.core.types.Web3AuthResponse
 import com.web3auth.core.types.WhiteLabelData
@@ -167,7 +167,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
         val options = Web3AuthOptions(
             clientId = "BFuUqebV5I8Pz5F7a5A2ihW7YVmbv_OHXnHYDv6OltAD5NGr6e-ViNvde3U4BHdn6HvwfkgobhVu4VwC-OSJkik",
-            network = Network.SAPPHIRE_DEVNET,
+            web3AuthNetwork = Web3AuthNetwork.SAPPHIRE_DEVNET,
             redirectUrl = Uri.parse("torusapp://org.torusresearch.web3authexample"),
 //            sdkUrl = "https://auth.mocaverse.xyz",
 //            walletSdkUrl = "https://lrc-mocaverse.web3auth.io",
@@ -224,7 +224,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         launchWalletButton.setOnClickListener {
             val launchWalletCompletableFuture = web3Auth.showWalletUI(
                 chainConfig = listOf(
-                    ChainsConfig(
+                    ChainConfig(
                         chainId = "0x89",
                         rpcTarget = "https://1rpc.io/matic",
                         chainNamespace = ChainNamespace.EIP155
@@ -250,7 +250,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 add("Android")
             }
             val signMsgCompletableFuture = web3Auth.request(
-                chainConfig = ChainsConfig(
+                chainConfig = ChainConfig(
                     chainId = "0x89",
                     rpcTarget = "https://polygon-rpc.com/",
                     chainNamespace = ChainNamespace.EIP155

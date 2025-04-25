@@ -5,7 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import com.google.gson.GsonBuilder
-import com.web3auth.core.types.Network
+import com.web3auth.core.types.Web3AuthNetwork
 import com.web3auth.session_manager_android.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -15,13 +15,13 @@ import java.util.concurrent.TimeUnit
 
 object ApiHelper {
     // TODO: Abstract this to a single common source, i.e torus-common, then add these to here and fetch-node-details, etc respectively
-    val SIGNER_MAP: Map<Network, String> = mapOf(
-        Network.MAINNET to "https://signer.web3auth.io",
-        Network.TESTNET to "https://signer.web3auth.io",
-        Network.CYAN to "https://signer-polygon.web3auth.io",
-        Network.AQUA to "https://signer-polygon.web3auth.io",
-        Network.SAPPHIRE_MAINNET to "https://signer.web3auth.io",
-        Network.SAPPHIRE_DEVNET to "https://signer.web3auth.io"
+    val SIGNER_MAP: Map<Web3AuthNetwork, String> = mapOf(
+        Web3AuthNetwork.MAINNET to "https://signer.web3auth.io",
+        Web3AuthNetwork.TESTNET to "https://signer.web3auth.io",
+        Web3AuthNetwork.CYAN to "https://signer-polygon.web3auth.io",
+        Web3AuthNetwork.AQUA to "https://signer-polygon.web3auth.io",
+        Web3AuthNetwork.SAPPHIRE_MAINNET to "https://signer.web3auth.io",
+        Web3AuthNetwork.SAPPHIRE_DEVNET to "https://signer.web3auth.io"
     )
 
     private const val sessionBaseUrl = "https://session.web3auth.io"
@@ -39,7 +39,7 @@ object ApiHelper {
     private val builder = GsonBuilder().disableHtmlEscaping().create()
 
     fun getInstance(network: String): Retrofit {
-        return Retrofit.Builder().baseUrl(SIGNER_MAP[Network.valueOf(network)])
+        return Retrofit.Builder().baseUrl(SIGNER_MAP[Web3AuthNetwork.valueOf(network)])
             .addConverterFactory(GsonConverterFactory.create(builder))
             .client(okHttpClient)
             .build()
