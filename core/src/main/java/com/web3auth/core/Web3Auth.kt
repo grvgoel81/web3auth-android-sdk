@@ -283,7 +283,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                                 throwLoginError(ErrorCode.SOMETHING_WENT_WRONG)
                                 throwEnableMFAError(ErrorCode.SOMETHING_WENT_WRONG)
                                 throwManageMFAError(ErrorCode.SOMETHING_WENT_WRONG)
-                            } else if (web3AuthResponse?.privKey.isNullOrBlank() && web3AuthResponse?.factorKey.isNullOrBlank()) {
+                            } else if (web3AuthResponse?.privateKey.isNullOrBlank() && web3AuthResponse?.factorKey.isNullOrBlank()) {
                                 throwLoginError(ErrorCode.SOMETHING_WENT_WRONG)
                                 throwEnableMFAError(ErrorCode.SOMETHING_WENT_WRONG)
                                 throwManageMFAError(ErrorCode.SOMETHING_WENT_WRONG)
@@ -431,7 +431,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                             )
                         )
                     )
-                } else if (web3AuthResponse?.privKey.isNullOrBlank() && web3AuthResponse?.factorKey.isNullOrBlank()) {
+                } else if (web3AuthResponse?.privateKey.isNullOrBlank() && web3AuthResponse?.factorKey.isNullOrBlank()) {
                     sessionCompletableFuture.completeExceptionally(
                         Exception(
                             Web3AuthError.getError(ErrorCode.SOMETHING_WENT_WRONG)
@@ -697,7 +697,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             if (web3AuthOption.useCoreKitKey == true) {
                 web3AuthResponse?.coreKitKey
             } else {
-                web3AuthResponse?.privKey
+                web3AuthResponse?.privateKey
             }
         }
         return privKey

@@ -2,10 +2,12 @@ package com.web3auth.core.types
 
 import android.net.Uri
 import androidx.annotation.Keep
+import com.google.gson.annotations.SerializedName
 
 @Keep
 data class Web3AuthOptions(
     val clientId: String,
+    @SerializedName("network")
     val web3AuthNetwork: Web3AuthNetwork,
     var authBuildEnv: BuildEnv? = BuildEnv.PRODUCTION,
     @Transient var redirectUrl: Uri,
