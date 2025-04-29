@@ -47,8 +47,8 @@ enum class AuthConnection {
     @SerializedName("email_passwordless")
     EMAIL_PASSWORDLESS,
 
-    @SerializedName("jwt")
-    JWT, // needs to check whether removed or not
+    @SerializedName("custom")
+    CUSTOM,
 
     @SerializedName("sms_passwordless")
     SMS_PASSWORDLESS,

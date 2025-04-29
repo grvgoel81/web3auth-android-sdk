@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         AuthConnectionLogin("Line", AuthConnection.LINE),
         AuthConnectionLogin("Hosted Email Passwordless", AuthConnection.EMAIL_PASSWORDLESS),
         AuthConnectionLogin("SMS Passwordless", AuthConnection.SMS_PASSWORDLESS),
-        AuthConnectionLogin("JWT", AuthConnection.JWT),
+        AuthConnectionLogin("CUSTOM", AuthConnection.CUSTOM),
         AuthConnectionLogin("Farcaster", AuthConnection.FARCASTER)
     )
 
@@ -182,7 +182,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             authConnectionConfig = listOf(
                 AuthConnectionConfig(
                     authConnectionId = "web3auth-auth0-email-passwordless-sapphire-devnet",
-                    authConnection = AuthConnection.JWT,
+                    authConnection = AuthConnection.CUSTOM,
                     clientId = "d84f6xvbdV75VTGmHiMWfZLeSPk8M07C"
                 )
             ),
