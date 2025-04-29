@@ -169,8 +169,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             clientId = "BFuUqebV5I8Pz5F7a5A2ihW7YVmbv_OHXnHYDv6OltAD5NGr6e-ViNvde3U4BHdn6HvwfkgobhVu4VwC-OSJkik",
             web3AuthNetwork = Web3AuthNetwork.SAPPHIRE_DEVNET,
             redirectUrl = Uri.parse("torusapp://org.torusresearch.web3authexample"),
-//            sdkUrl = "https://auth.mocaverse.xyz",
-//            walletSdkUrl = "https://lrc-mocaverse.web3auth.io",
+            //sdkUrl = "https://auth.mocaverse.xyz",
+            //walletSdkUrl = "https://lrc-mocaverse.web3auth.io",
             whiteLabel = WhiteLabelData(
                 "Web3Auth Sample App", null, null, null,
                 Language.EN, ThemeModes.LIGHT, true,
@@ -197,6 +197,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             options, this
         )
 
+        //Set intent result url from Web3Auth redirect
         web3Auth.setResultUrl(intent.data)
 
         // for session response
