@@ -48,7 +48,7 @@ enum class AuthConnection {
     EMAIL_PASSWORDLESS,
 
     @SerializedName("custom")
-    CUSTOM,
+    CUSTOM, //for jwt
 
     @SerializedName("sms_passwordless")
     SMS_PASSWORDLESS,

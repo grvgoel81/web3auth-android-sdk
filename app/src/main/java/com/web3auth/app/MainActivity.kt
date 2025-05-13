@@ -95,8 +95,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         loginCompletableFuture.whenComplete { _, error ->
             if (error == null) {
                 reRender()
-                println("PrivKey: " + web3Auth.getPrivkey())
-                println("ed25519PrivKey: " + web3Auth.getEd25519PrivKey())
+                println("PrivKey: " + web3Auth.getPrivateKey())
+                println("ed25519PrivKey: " + web3Auth.getEd25519PrivateKey())
                 println("Web3Auth UserInfo" + web3Auth.getUserInfo())
             } else {
                 Log.d("MainActivity_Web3Auth", error.message ?: "Something went wrong")
@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         var key: String? = null
         var userInfo: UserInfo? = null
         try {
-            key = web3Auth.getPrivkey()
+            key = web3Auth.getPrivateKey()
             userInfo = web3Auth.getUserInfo()
         } catch (ex: Exception) {
             print(ex)
@@ -205,8 +205,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         sessionResponse.whenComplete { _, error ->
             if (error == null) {
                 reRender()
-                println("PrivKey: " + web3Auth.getPrivkey())
-                println("ed25519PrivKey: " + web3Auth.getEd25519PrivKey())
+                println("PrivKey: " + web3Auth.getPrivateKey())
+                println("ed25519PrivKey: " + web3Auth.getEd25519PrivateKey())
                 println("Web3Auth UserInfo" + web3Auth.getUserInfo())
             } else {
                 //handle retry login
@@ -244,7 +244,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
         val signMsgButton = findViewById<Button>(R.id.signMsgButton)
         signMsgButton.setOnClickListener {
-            val credentials: Credentials = Credentials.create(web3Auth.getPrivkey())
+            val credentials: Credentials = Credentials.create(web3Auth.getPrivateKey())
             val params = JsonArray().apply {
                 add("Hello, World!")
                 add(credentials.address)
