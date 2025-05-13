@@ -690,7 +690,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
      *
      * @return The private key as a string.
      */
-    fun getPrivkey(): String {
+    fun getPrivateKey(): String {
         val privKey: String? = if (web3AuthResponse == null) {
             ""
         } else {
@@ -709,7 +709,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
      *
      * @return The Ed25519 private key as a string.
      */
-    fun getEd25519PrivKey(): String {
+    fun getEd25519PrivateKey(): String {
         val ed25519Key: String? = if (web3AuthResponse == null) {
             null
         } else {
