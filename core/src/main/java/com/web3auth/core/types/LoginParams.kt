@@ -13,4 +13,6 @@ data class LoginParams(
     @Keep val mfaLevel: MFALevel? = null,
     @Keep val curve: Curve? = Curve.SECP256K1,
     @Keep val dappUrl: String? = null,
+    @Keep val authConnectionId: String? = null,
+    @Keep val groupedAuthConnectionId: String? = null
 )
