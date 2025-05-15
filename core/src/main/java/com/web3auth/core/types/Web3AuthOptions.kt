@@ -20,7 +20,8 @@ data class Web3AuthOptions(
     val sessionTime: Int? = 30 * 86400,
     var walletSdkUrl: String? = getWalletSdkUrl(authBuildEnv),
     var dashboardUrl: String? = getDashboardUrl(authBuildEnv),
-    var originData: Map<String, String>? = null
+    var originData: Map<String, String>? = null,
+    var includeUserDataInToken: Boolean? = false,
 ) {
     init {
         if (dashboardUrl == null) {
