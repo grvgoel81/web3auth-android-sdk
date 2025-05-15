@@ -1,6 +1,7 @@
 package com.web3auth.core.types
 
 import androidx.annotation.Keep
+import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
 @Keep
@@ -9,8 +10,10 @@ data class ExtraLoginOptions(
     @Keep private var domain: String? = null,
     @Keep private var client_id: String? = null,
     @Keep private var leeway: String? = null,
-    @Keep private var verifierIdField: String? = null,
-    @Keep private var isVerifierIdCaseSensitive: Boolean? = null,
+    @Keep private var userIdField: String? = null,
+    @Keep private var isUserIdCaseSensitive: Boolean? = null,
+    @Keep private var access_token: String? = null,
+    @Keep private var flow_type: EMAIL_FLOW = EMAIL_FLOW.link,
     @Keep private var display: Display? = null,
     @Keep private var prompt: Prompt? = null,
     @Keep private var max_age: String? = null,
@@ -27,3 +30,12 @@ data class ExtraLoginOptions(
     @Keep private var nonce: String? = null,
     @Keep private var redirect_uri: String? = null
 ) : Serializable
+
+@Keep
+enum class EMAIL_FLOW {
+    @SerializedName("link")
+    link,
+
+    @SerializedName("code")
+    code,
+}
