@@ -13,7 +13,7 @@ data class ExtraLoginOptions(
     @Keep private var userIdField: String? = null,
     @Keep private var isUserIdCaseSensitive: Boolean? = null,
     @Keep private var access_token: String? = null,
-    @Keep private var flow_type: EMAIL_FLOW_TYPE = EMAIL_FLOW_TYPE.link,
+    @Keep private var flow_type: EmailFlowType = EmailFlowType.link,
     @Keep private var display: Display? = null,
     @Keep private var prompt: Prompt? = null,
     @Keep private var max_age: String? = null,
@@ -32,7 +32,7 @@ data class ExtraLoginOptions(
 ) : Serializable
 
 @Keep
-enum class EMAIL_FLOW_TYPE {
+enum class EmailFlowType {
     @SerializedName("link")
     link,
 
