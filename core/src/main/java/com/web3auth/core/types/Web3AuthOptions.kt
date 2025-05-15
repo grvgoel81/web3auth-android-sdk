@@ -21,7 +21,7 @@ data class Web3AuthOptions(
     var walletSdkUrl: String? = getWalletSdkUrl(authBuildEnv),
     var dashboardUrl: String? = getDashboardUrl(authBuildEnv),
     var originData: Map<String, String>? = null,
-    var includeUserDataInToken: Boolean? = false,
+    var includeUserDataInToken: Boolean? = true,
 ) {
     init {
         if (dashboardUrl == null) {
