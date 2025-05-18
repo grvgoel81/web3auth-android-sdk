@@ -10,7 +10,6 @@ data class AuthConnectionConfig(
     @Keep var description: String? = null,
     @Keep var clientId: String,
     @Keep var groupedAuthConnectionId: String? = null,
-    @Keep var verifierSubIdentifier: String? = null,
     @Keep var logoHover: String? = null,
     @Keep var logoLight: String? = null,
     @Keep var logoDark: String? = null,
