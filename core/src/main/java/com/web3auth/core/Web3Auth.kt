@@ -90,6 +90,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     private fun getInitParams(params: LoginParams?): InitParams {
         return InitParams(
             authConnection = params?.authConnection?.name?.lowercase(Locale.ROOT),
+            authConnectionId = params?.authConnectionId,
+            groupedAuthConnectionId = params?.groupedAuthConnectionId,
             extraLoginOptions = params?.extraLoginOptions?.let { gson.toJson(it) },
             redirectUrl = params?.redirectUrl?.toString() ?: web3AuthOption.redirectUrl.toString(),
             mfaLevel = params?.mfaLevel?.name?.lowercase(Locale.ROOT),
