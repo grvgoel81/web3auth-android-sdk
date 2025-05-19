@@ -56,3 +56,11 @@
     <init>(...);
 }
 -keepattributes KotlinMetadata, Signature, InnerClasses, EnclosingMethod, *Annotation*
+-keepclassmembers class com.web3auth.core.** {
+    public <init>(...);
+}
+-keep @androidx.annotation.Keep class * { *; }
+-keepclassmembers class * {
+    @androidx.annotation.Keep *;
+}
+
