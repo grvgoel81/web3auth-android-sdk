@@ -24,7 +24,7 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            consumerProguardFiles 'proguard-rules.pro', 'gson.pro', 'retrofit2.pro'
+            consumerProguardFiles 'proguard-rules.pro', 'gson.pro', 'retrofit2.pro', 'consumer-rules.pro'
         }
     }
     compileOptions {

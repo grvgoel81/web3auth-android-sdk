@@ -67,11 +67,3 @@
 -keep enum com.web3auth.core.types.ErrorCode {
     *;
 }
--keep @kotlin.Metadata class * { *; }
--keepclassmembers class * {
-    @kotlin.Metadata *;
-}
--keepclassmembers class * {
-    <init>(...);
-}
--keepattributes KotlinMetadata, Signature, InnerClasses, EnclosingMethod, *Annotation*
