@@ -6,22 +6,22 @@ import com.google.gson.annotations.SerializedName
 
 @Keep
 data class Web3AuthOptions(
-    val clientId: String,
+    @Keep val clientId: String,
     @SerializedName("network")
-    val web3AuthNetwork: Web3AuthNetwork,
-    var authBuildEnv: BuildEnv? = BuildEnv.PRODUCTION,
-    @Transient var redirectUrl: Uri,
-    var sdkUrl: String = getSdkUrl(authBuildEnv),
-    var whiteLabel: WhiteLabelData? = null,
-    val authConnectionConfig: List<AuthConnectionConfig>? = emptyList(),
-    val useCoreKitKey: Boolean? = false,
-    val chainNamespace: ChainNamespace? = ChainNamespace.EIP155,
-    val mfaSettings: MfaSettings? = null,
-    val sessionTime: Int? = 30 * 86400,
-    var walletSdkUrl: String? = getWalletSdkUrl(authBuildEnv),
-    var dashboardUrl: String? = getDashboardUrl(authBuildEnv),
-    var originData: Map<String, String>? = null,
-    var includeUserDataInToken: Boolean? = true,
+    @Keep val web3AuthNetwork: Web3AuthNetwork,
+    @Keep var authBuildEnv: BuildEnv? = BuildEnv.PRODUCTION,
+    @Keep @Transient var redirectUrl: Uri,
+    @Keep var sdkUrl: String = getSdkUrl(authBuildEnv),
+    @Keep var whiteLabel: WhiteLabelData? = null,
+    @Keep val authConnectionConfig: List<AuthConnectionConfig>? = emptyList(),
+    @Keep val useCoreKitKey: Boolean? = false,
+    @Keep val chainNamespace: ChainNamespace? = ChainNamespace.EIP155,
+    @Keep val mfaSettings: MfaSettings? = null,
+    @Keep val sessionTime: Int? = 30 * 86400,
+    @Keep var walletSdkUrl: String? = getWalletSdkUrl(authBuildEnv),
+    @Keep var dashboardUrl: String? = getDashboardUrl(authBuildEnv),
+    @Keep var originData: Map<String, String>? = null,
+    @Keep var includeUserDataInToken: Boolean? = true,
 ) {
     init {
         if (dashboardUrl == null) {
