@@ -78,6 +78,10 @@ dependencies {
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01"
 
+    api 'org.torusresearch:torus-utils-java:4.0.3'
+    api 'org.torusresearch:fetch-node-details-java:5.0.0'
+    implementation 'com.auth0.android:jwtdecode:2.0.2'
+
     // Test
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'

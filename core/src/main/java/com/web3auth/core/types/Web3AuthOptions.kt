@@ -3,25 +3,33 @@ package com.web3auth.core.types
 import android.net.Uri
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
+import org.torusresearch.fetchnodedetails.types.Web3AuthNetwork
 
 @Keep
 data class Web3AuthOptions(
     @Keep val clientId: String,
+    @Keep @Transient var redirectUrl: Uri,
+    @Keep var originData: Map<String, String>? = null,
+    @Keep var authBuildEnv: BuildEnv = BuildEnv.PRODUCTION,
+    @Keep var sdkUrl: String = getSdkUrl(authBuildEnv),
+    @Keep var storageServerUrl: String? = null,
+    @Keep var sessionSocketUrl: String? = null,
+    @Keep val authConnectionConfig: List<AuthConnectionConfig>? = emptyList(),
+    @Keep var dashboardUrl: String? = getDashboardUrl(authBuildEnv),
+    @Keep var accountAbstractionConfig: String? = null,
+    @Keep var walletSdkUrl: String? = getWalletSdkUrl(authBuildEnv),
+    @Keep var sessionNamespace: String? = null,
+    @Keep var includeUserDataInToken: Boolean? = true,
+    @Keep var chains: Chains? = null,
+    @Keep var defaultChainId: String? = null,
+    @Keep var enableLogging: Boolean = false,
+    @Keep val sessionTime: Int = 30 * 86400,
     @SerializedName("network")
     @Keep val web3AuthNetwork: Web3AuthNetwork,
-    @Keep var authBuildEnv: BuildEnv? = BuildEnv.PRODUCTION,
-    @Keep @Transient var redirectUrl: Uri,
-    @Keep var sdkUrl: String = getSdkUrl(authBuildEnv),
-    @Keep var whiteLabel: WhiteLabelData? = null,
-    @Keep val authConnectionConfig: List<AuthConnectionConfig>? = emptyList(),
-    @Keep val useCoreKitKey: Boolean? = false,
-    @Keep val chainNamespace: ChainNamespace? = ChainNamespace.EIP155,
+    @Keep val useSFAKey: Boolean? = false,
+    @Keep val walletServicesConfig: Boolean? = false,
+    //@Keep val chainNamespace: ChainNamespace? = ChainNamespace.EIP155,
     @Keep val mfaSettings: MfaSettings? = null,
-    @Keep val sessionTime: Int? = 30 * 86400,
-    @Keep var walletSdkUrl: String? = getWalletSdkUrl(authBuildEnv),
-    @Keep var dashboardUrl: String? = getDashboardUrl(authBuildEnv),
-    @Keep var originData: Map<String, String>? = null,
-    @Keep var includeUserDataInToken: Boolean? = true,
 ) {
     init {
         if (dashboardUrl == null) {

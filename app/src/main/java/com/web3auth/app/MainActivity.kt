@@ -24,19 +24,18 @@ import com.web3auth.core.isPhoneNumberValid
 import com.web3auth.core.types.AuthConnection
 import com.web3auth.core.types.AuthConnectionConfig
 import com.web3auth.core.types.BuildEnv
-import com.web3auth.core.types.ChainConfig
 import com.web3auth.core.types.ChainNamespace
+import com.web3auth.core.types.Chains
 import com.web3auth.core.types.ExtraLoginOptions
 import com.web3auth.core.types.Language
 import com.web3auth.core.types.LoginParams
-import com.web3auth.core.types.MFALevel
 import com.web3auth.core.types.ThemeModes
 import com.web3auth.core.types.UserInfo
-import com.web3auth.core.types.Web3AuthNetwork
 import com.web3auth.core.types.Web3AuthOptions
 import com.web3auth.core.types.Web3AuthResponse
 import com.web3auth.core.types.WhiteLabelData
 import org.json.JSONObject
+import org.torusresearch.fetchnodedetails.types.Web3AuthNetwork
 import org.web3j.crypto.Credentials
 import java.util.concurrent.CompletableFuture
 
@@ -85,12 +84,11 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             extraLoginOptions = ExtraLoginOptions(login_hint = hintPhNo)
         }
 
-        val loginCompletableFuture: CompletableFuture<Web3AuthResponse> = web3Auth.login(
+        val loginCompletableFuture: CompletableFuture<Web3AuthResponse> = web3Auth.connectTo(
             LoginParams(
-                selectedLoginProvider,
-                extraLoginOptions = extraLoginOptions,
-                mfaLevel = MFALevel.OPTIONAL
-            )
+                AuthConnection.GOOGLE,
+                authConnectionId = "w3ads", groupedAuthConnectionId = "aggregate-mobile"
+            ), ctx = this.applicationContext
         )
         loginCompletableFuture.whenComplete { _, error ->
             if (error == null) {
@@ -164,10 +162,28 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val authConfig = ArrayList<AuthConnectionConfig>()
+        authConfig.add(
+            AuthConnectionConfig(
+                authConnection = AuthConnection.GOOGLE,
+                authConnectionId = "w3ads",
+                groupedAuthConnectionId = "aggregate-mobile",
+                clientId = "519228911939-snh959gvvmjieoo4j14kkaancbkjp34r.apps.googleusercontent.com"
+            )
+        )
+
+        authConfig.add(
+            AuthConnectionConfig(
+                authConnection = AuthConnection.CUSTOM,
+                authConnectionId = "auth0-test",
+                groupedAuthConnectionId = "aggregate-mobile",
+                clientId = "hUVVf4SEsZT7syOiL0gLU9hFEtm2gQ6O"
+            )
+        )
 
         val options = Web3AuthOptions(
-            clientId = "BFuUqebV5I8Pz5F7a5A2ihW7YVmbv_OHXnHYDv6OltAD5NGr6e-ViNvde3U4BHdn6HvwfkgobhVu4VwC-OSJkik",
-            web3AuthNetwork = Web3AuthNetwork.SAPPHIRE_DEVNET,
+            clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ",
+            web3AuthNetwork = Web3AuthNetwork.SAPPHIRE_MAINNET,
             redirectUrl = Uri.parse("torusapp://org.torusresearch.web3authexample"),
             //sdkUrl = "https://auth.mocaverse.xyz",
             //walletSdkUrl = "https://lrc-mocaverse.web3auth.io",
@@ -179,13 +195,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                     "onPrimary" to "#0000FF"
                 )
             ),
-            authConnectionConfig = listOf(
-                AuthConnectionConfig(
-                    authConnectionId = "web3auth-auth0-email-passwordless-sapphire-devnet",
-                    authConnection = AuthConnection.CUSTOM,
-                    clientId = "d84f6xvbdV75VTGmHiMWfZLeSPk8M07C"
-                )
-            ),
+            authConnectionConfig = authConfig,
+            /*listOf(
+                            AuthConnectionConfig(
+                                authConnectionId = "web3auth-auth0-email-passwordless-sapphire-devnet",
+                                authConnection = AuthConnection.GOOGLE,
+                                clientId = "d84f6xvbdV75VTGmHiMWfZLeSPk8M07C"
+                            )
+                        ),*/
             authBuildEnv = BuildEnv.TESTING,
             sessionTime = 86400,
         )
@@ -225,7 +242,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         launchWalletButton.setOnClickListener {
             val launchWalletCompletableFuture = web3Auth.showWalletUI(
                 chainConfig = listOf(
-                    ChainConfig(
+                    Chains(
                         chainId = "0x89",
                         rpcTarget = "https://1rpc.io/matic",
                         chainNamespace = ChainNamespace.EIP155
@@ -251,7 +268,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 add("Android")
             }
             val signMsgCompletableFuture = web3Auth.request(
-                chainConfig = ChainConfig(
+                chainConfig = Chains(
                     chainId = "0x89",
                     rpcTarget = "https://polygon-rpc.com/",
                     chainNamespace = ChainNamespace.EIP155
