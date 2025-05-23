@@ -1,6 +1,5 @@
 package com.web3auth.core.types
 
-import android.net.Uri
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 import org.torusresearch.fetchnodedetails.types.Web3AuthNetwork
@@ -8,8 +7,9 @@ import org.torusresearch.fetchnodedetails.types.Web3AuthNetwork
 @Keep
 data class Web3AuthOptions(
     @Keep val clientId: String,
-    @Keep @Transient var redirectUrl: Uri,
+    @Keep var redirectUrl: String,
     @Keep var originData: Map<String, String>? = null,
+    @SerializedName("buildEnv")
     @Keep var authBuildEnv: BuildEnv = BuildEnv.PRODUCTION,
     @Keep var sdkUrl: String = getSdkUrl(authBuildEnv),
     @Keep var storageServerUrl: String? = null,
@@ -27,7 +27,7 @@ data class Web3AuthOptions(
     @SerializedName("network")
     @Keep val web3AuthNetwork: Web3AuthNetwork,
     @Keep val useSFAKey: Boolean? = false,
-    @Keep val walletServicesConfig: Boolean? = false,
+    @Keep val walletServicesConfig: WalletServicesConfig? = null,
     //@Keep val chainNamespace: ChainNamespace? = ChainNamespace.EIP155,
     @Keep val mfaSettings: MfaSettings? = null,
 ) {

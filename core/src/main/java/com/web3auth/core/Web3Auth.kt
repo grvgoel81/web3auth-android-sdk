@@ -6,13 +6,14 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import com.auth0.android.jwt.JWT
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.web3auth.core.api.ApiHelper
 import com.web3auth.core.api.ApiService
 import com.web3auth.core.keystore.KeyStoreManagerUtils
-import com.web3auth.core.types.ChainConfig
+import com.web3auth.core.types.AuthConnection
 import com.web3auth.core.types.ErrorCode
 import com.web3auth.core.types.ExtraLoginOptions
 import com.web3auth.core.types.InitOptions
@@ -38,6 +39,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import org.torusresearch.fetchnodedetails.FetchNodeDetails
+import org.torusresearch.fetchnodedetails.types.NodeDetails
+import org.torusresearch.torusutils.TorusUtils
+import org.torusresearch.torusutils.types.common.SessionToken
+import org.torusresearch.torusutils.types.common.TorusKey
+import org.torusresearch.torusutils.types.common.TorusOptions
 import java.util.Locale
 import java.util.concurrent.CompletableFuture
 
@@ -51,13 +58,27 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     private lateinit var manageMfaCompletableFuture: CompletableFuture<Boolean>
     private lateinit var signMsgCF: CompletableFuture<SignResponse>
 
+    private var nodeDetailManager: FetchNodeDetails =
+        FetchNodeDetails(web3AuthOptions.web3AuthNetwork)
+    private val torusUtils: TorusUtils
     private var web3AuthResponse: Web3AuthResponse? = null
     private var web3AuthOption = web3AuthOptions
-    private var sessionManager: SessionManager = SessionManager(
-        context,
-        web3AuthOptions.sessionTime ?: 30 * 86400,
-        web3AuthOptions.redirectUrl.toString()
-    )
+    private var sessionManager: SessionManager
+
+    init {
+        val torusOptions = TorusOptions(
+            web3AuthOptions.clientId, web3AuthOptions.web3AuthNetwork, null,
+            0, true
+        )
+        //network = web3AuthOptions.web3AuthNetwork
+        torusUtils = TorusUtils(torusOptions)
+        sessionManager = SessionManager(
+            context,
+            web3AuthOptions.sessionTime,
+            context.packageName,
+            sessionNamespace = if (web3AuthOptions.sessionNamespace?.isNotEmpty() == true) web3AuthOptions.sessionNamespace else ""
+        )
+    }
 
     /**
      * Initializes the KeyStoreManager.
@@ -71,9 +92,9 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             clientId = web3AuthOption.clientId,
             network = web3AuthOption.web3AuthNetwork.name.lowercase(Locale.ROOT),
             redirectUrl = web3AuthOption.redirectUrl.toString(),
-            whiteLabel = web3AuthOption.whiteLabel?.let { gson.toJson(it) },
+            whiteLabel = web3AuthOption.walletServicesConfig?.whiteLabel.let { gson.toJson(it) },
             authConnectionConfig = web3AuthOption.authConnectionConfig?.let { gson.toJson(it) },
-            buildEnv = web3AuthOption.authBuildEnv?.name?.lowercase(Locale.ROOT),
+            buildEnv = web3AuthOption.authBuildEnv.name.lowercase(Locale.ROOT),
             mfaSettings = web3AuthOption.mfaSettings?.let { gson.toJson(it) },
             sessionTime = web3AuthOption.sessionTime,
             originData = web3AuthOption.originData?.let { gson.toJson(it) },
@@ -93,7 +114,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             authConnectionId = params?.authConnectionId,
             groupedAuthConnectionId = params?.groupedAuthConnectionId,
             extraLoginOptions = params?.extraLoginOptions?.let { gson.toJson(it) },
-            redirectUrl = params?.redirectUrl?.toString() ?: web3AuthOption.redirectUrl.toString(),
+            redirectUrl = web3AuthOption.redirectUrl.toString(),
             mfaLevel = params?.mfaLevel?.name?.lowercase(Locale.ROOT),
             curve = params?.curve?.name?.lowercase(Locale.ROOT),
             dappShare = params?.dappShare,
@@ -113,20 +134,29 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     ) {
         val sdkUrl = Uri.parse(web3AuthOption.sdkUrl)
 
-        val initOptions = if (actionType == "manage_mfa") {
-            getInitOptions().copy(redirectUrl = getInitOptions().dashboardUrl)
+        val redirectUrl = if (actionType == "manage_mfa") {
+            web3AuthOption.dashboardUrl
         } else {
-            getInitOptions()
+            web3AuthOption.redirectUrl
         }
 
-        val initParams = if (actionType == "manage_mfa") {
-            initOptions.dashboardUrl?.let { getInitParams(params).copy(redirectUrl = it) }
-        } else {
-            getInitParams(params)
+        if (redirectUrl != null) {
+            web3AuthOption.redirectUrl = redirectUrl
         }
 
-        val initOptionsJson = JSONObject(gson.toJson(initOptions))
-        val initParamsJson = JSONObject(gson.toJson(initParams))
+        val initOptionsJson = JSONObject(gson.toJson(web3AuthOption))
+        initOptionsJson.put(
+            "network",
+            web3AuthOption.web3AuthNetwork.toString().lowercase(Locale.ROOT)
+        )
+
+        val initParamsJson = JSONObject(gson.toJson(params))
+
+        if (actionType == "manage_mfa") {
+            initParamsJson.put("redirectUrl", web3AuthOption.dashboardUrl)
+        } else {
+            initParamsJson.put("redirectUrl", web3AuthOption.redirectUrl)
+        }
 
         val sessionId = SessionManager.generateRandomSessionKey()
 
@@ -342,6 +372,163 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         return loginCompletableFuture
     }
 
+    fun connectTo(
+        loginParams: LoginParams,
+        ctx: Context
+    ): CompletableFuture<Web3AuthResponse> {
+        if (loginParams.idToken.isNullOrEmpty()) {
+            if (!loginParams.loginHint.isNullOrEmpty()) {
+                val updatedExtraLoginOptions = loginParams.extraLoginOptions?.copy(
+                    login_hint = loginParams.loginHint
+                ) ?: ExtraLoginOptions(login_hint = loginParams.loginHint)
+
+                loginParams.copy(extraLoginOptions = updatedExtraLoginOptions)
+            } else {
+                loginParams
+            }.also {
+                login(it) // PnP login
+            }
+        } else {
+            connect(loginParams, ctx) // SFA login
+            loginParams
+        }
+
+        loginCompletableFuture = CompletableFuture()
+        return loginCompletableFuture
+
+    }
+
+    fun connect(
+        loginParams: LoginParams,
+        ctx: Context
+    ): Web3AuthResponse {
+        val torusKey = getTorusKey(loginParams)
+
+        val publicAddress = torusKey.finalKeyData?.walletAddress
+        val privateKey = if (torusKey.finalKeyData?.privKey?.isEmpty() == true) {
+            torusKey.getoAuthKeyData().privKey
+        } else {
+            torusKey.finalKeyData?.privKey
+        }
+
+        var decodedUserInfo: UserInfo?
+
+        try {
+            val jwt = loginParams.idToken?.let { decodeJwt(it) }
+            jwt.let {
+                decodedUserInfo = UserInfo(
+                    email = it?.getClaim("email")?.asString() ?: "",
+                    name = it?.getClaim("name")?.asString() ?: "",
+                    profileImage = it?.getClaim("picture")?.asString() ?: "",
+                    authConnectionId = loginParams.authConnectionId.toString(),
+                    authConnection = AuthConnection.CUSTOM.name.lowercase(Locale.ROOT),
+                    userId = it?.getClaim("userId")?.asString() ?: "",
+                )
+            }
+        } catch (e: Exception) {
+            throw Exception(Web3AuthError.getError(ErrorCode.INVALID_LOGIN))
+        }
+
+        val web3AuthResponse = Web3AuthResponse(
+            privateKey = privateKey.toString(),
+            signatures = getSignatureData(torusKey.sessionData.sessionTokenData),
+            userInfo = decodedUserInfo
+        )
+
+        val sessionId = SessionManager.generateRandomSessionKey()
+        sessionManager.setSessionId(sessionId)
+        sessionManager.createSession(gson.toJson(web3AuthResponse), ctx)
+            .whenComplete { result, err ->
+                if (err == null) {
+                    SessionManager.saveSessionIdToStorage(result)
+                    sessionManager.setSessionId(result)
+                }
+            }
+
+        return web3AuthResponse
+    }
+
+    private fun getTorusKey(
+        loginParams: LoginParams
+    ): TorusKey {
+        lateinit var retrieveSharesResponse: TorusKey
+
+        val userId = getUserIdFromJWT(loginParams.idToken.toString())
+        val nodeDetails: NodeDetails =
+            nodeDetailManager.getNodeDetails(loginParams.authConnectionId, userId)
+                .get()
+
+        /*loginParams.subVerifierInfoArray?.let {
+            val aggregateIdTokenSeeds: ArrayList<String> = ArrayList()
+            val subVerifierIds: ArrayList<String> = ArrayList()
+            val verifyParams: ArrayList<VerifyParams> = ArrayList()
+
+            for(value: TorusSubVerifierInfo in it) {
+                aggregateIdTokenSeeds.add(value.idToken)
+                val verifyParam = VerifyParams(userId, value.idToken)
+                verifyParams.add(verifyParam)
+                subVerifierIds.add(value.verifier)
+            }
+
+            aggregateIdTokenSeeds.sort()
+            val verifierParams = VerifierParams(userId.toString(), null,
+                subVerifierIds.toTypedArray(), verifyParams.toTypedArray()
+            )
+
+            val aggregateIdToken = Hash.sha3String(java.lang.String.join(29.toChar().toString(), aggregateIdTokenSeeds)).replace("0x", "")
+            retrieveSharesResponse = torusUtils.retrieveShares(
+                nodeDetails.torusNodeEndpoints,
+                loginParams.authConnectionId.toString(),
+                verifierParams,
+                aggregateIdToken,
+                null
+            )
+        } ?: run{
+            val verifierParams = VerifierParams(userId.toString(), null, null, null)
+            retrieveSharesResponse = torusUtils.retrieveShares(
+                nodeDetails.torusNodeEndpoints,
+                loginParams.authConnectionId.toString(),
+                verifierParams,
+                loginParams.idToken.toString(),
+                null
+            )
+        }*/
+
+        val isUpgraded = retrieveSharesResponse.metadata?.isUpgraded
+
+        if (isUpgraded == true) {
+            throw Exception(Web3AuthError.getError(ErrorCode.USER_ALREADY_ENABLED_MFA))
+        }
+
+        return retrieveSharesResponse
+    }
+
+    private fun decodeJwt(token: String): JWT {
+        return try {
+            JWT(token)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Failed to decode JWT token", e)
+        }
+    }
+
+    fun getUserIdFromJWT(token: String): String? {
+        return try {
+            val jwt = JWT(token)
+            jwt.getClaim("userId").asString()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    private fun getSignatureData(sessionTokenData: List<SessionToken>): List<String> {
+        return sessionTokenData
+            .filterNotNull()
+            .map { session ->
+                """{"data":"${session.token}","sig":"${session.signature}"}"""
+            }
+    }
+
 
     /**
      * Logs out the user asynchronously.
@@ -469,11 +656,11 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     web3AuthOption.originData =
                         web3AuthOption.originData.mergeMaps(response?.whitelist?.signed_urls)
                     if (response?.whitelabel != null) {
-                        if (web3AuthOption.whiteLabel == null) {
-                            web3AuthOption.whiteLabel = response.whitelabel
+                        if (web3AuthOption.walletServicesConfig?.whiteLabel == null) {
+                            web3AuthOption.walletServicesConfig?.whiteLabel = response.whitelabel
                         } else {
-                            web3AuthOption.whiteLabel =
-                                web3AuthOption.whiteLabel!!.merge(response.whitelabel)
+                            web3AuthOption.walletServicesConfig?.whiteLabel =
+                                web3AuthOption.walletServicesConfig?.whiteLabel!!.merge(response.whitelabel)
                         }
                     }
                     projectConfigCompletableFuture.complete(true)
@@ -523,8 +710,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
      * @return A CompletableFuture<Void> representing the asynchronous operation.
      */
     fun showWalletUI(
-        chainConfig: List<ChainConfig>,
-        chainId: String,
         path: String? = "wallet",
     ): CompletableFuture<Void> {
         val launchWalletServiceCF: CompletableFuture<Void> = CompletableFuture()
@@ -532,11 +717,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         if (savedSessionId.isNotBlank()) {
             val sdkUrl = Uri.parse(web3AuthOption.walletSdkUrl)
 
-            val initOptions = JSONObject(gson.toJson(getInitOptions()))
-            initOptions.put(
-                "chains", gson.toJson(chainConfig)
-            )
-            initOptions.put("chainId", chainId)
+            val initOptions = JSONObject(gson.toJson(web3AuthOption))
 
             val paramMap = JSONObject()
             paramMap.put(
@@ -586,7 +767,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
      * @return A CompletableFuture<Void> representing the asynchronous operation.
      */
     fun request(
-        chainConfig: ChainConfig,
         method: String,
         requestParams: JsonArray,
         path: String? = "wallet/request",
@@ -598,12 +778,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         val sessionId = SessionManager.getSessionIdFromStorage()
         if (sessionId.isNotBlank()) {
             val sdkUrl = Uri.parse(web3AuthOption.walletSdkUrl)
-            val initOptions = JSONObject(gson.toJson(getInitOptions()))
-            val chainConfigList = arrayListOf(chainConfig)
-            initOptions.put(
-                "chains", gson.toJson(chainConfigList)
-            )
-            initOptions.put("chainId", chainConfig.chainId)
+            //val chainConfigList = arrayListOf(chainConfig) TODO: remove
+            val initOptions = JSONObject(gson.toJson(web3AuthOption))
             val paramMap = JSONObject()
             paramMap.put(
                 "options", initOptions
@@ -696,7 +872,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         val privKey: String? = if (web3AuthResponse == null) {
             ""
         } else {
-            if (web3AuthOption.useCoreKitKey == true) {
+            if (web3AuthOption.useSFAKey == true) {
                 web3AuthResponse?.coreKitKey
             } else {
                 web3AuthResponse?.privateKey
@@ -715,7 +891,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         val ed25519Key: String? = if (web3AuthResponse == null) {
             null
         } else {
-            if (web3AuthOption.useCoreKitKey == true) {
+            if (web3AuthOption.useSFAKey == true) {
                 web3AuthResponse?.coreKitEd25519PrivKey
             } else {
                 web3AuthResponse?.ed25519PrivKey

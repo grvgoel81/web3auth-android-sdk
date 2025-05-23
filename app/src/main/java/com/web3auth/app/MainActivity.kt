@@ -1,7 +1,6 @@
 package com.web3auth.app
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
@@ -24,13 +23,11 @@ import com.web3auth.core.isPhoneNumberValid
 import com.web3auth.core.types.AuthConnection
 import com.web3auth.core.types.AuthConnectionConfig
 import com.web3auth.core.types.BuildEnv
-import com.web3auth.core.types.ChainNamespace
-import com.web3auth.core.types.Chains
-import com.web3auth.core.types.ExtraLoginOptions
 import com.web3auth.core.types.Language
 import com.web3auth.core.types.LoginParams
 import com.web3auth.core.types.ThemeModes
 import com.web3auth.core.types.UserInfo
+import com.web3auth.core.types.WalletServicesConfig
 import com.web3auth.core.types.Web3AuthOptions
 import com.web3auth.core.types.Web3AuthResponse
 import com.web3auth.core.types.WhiteLabelData
@@ -62,17 +59,20 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     private var selectedLoginProvider: AuthConnection = AuthConnection.GOOGLE
 
     private val gson = Gson()
+    private var TEST_VERIFIER = "torus-test-health"
+    private var TORUS_TEST_EMAIL = "hello@tor.us"
+    private var SFA_ClientId = "YOUR_CLIENT_ID"
 
     private fun signIn() {
         val hintEmailEditText = findViewById<EditText>(R.id.etEmailHint)
-        var extraLoginOptions: ExtraLoginOptions? = null
+        var loginHint: String? = null
         if (selectedLoginProvider == AuthConnection.EMAIL_PASSWORDLESS) {
             val hintEmail = hintEmailEditText.text.toString()
             if (hintEmail.isBlank() || !hintEmail.isEmailValid()) {
                 Toast.makeText(this, "Please enter a valid Email.", Toast.LENGTH_LONG).show()
                 return
             }
-            extraLoginOptions = ExtraLoginOptions(login_hint = hintEmail)
+            loginHint = hintEmail
         }
 
         if (selectedLoginProvider == AuthConnection.SMS_PASSWORDLESS) {
@@ -81,13 +81,15 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 Toast.makeText(this, "Please enter a valid Number.", Toast.LENGTH_LONG).show()
                 return
             }
-            extraLoginOptions = ExtraLoginOptions(login_hint = hintPhNo)
+            loginHint = hintPhNo
         }
 
         val loginCompletableFuture: CompletableFuture<Web3AuthResponse> = web3Auth.connectTo(
             LoginParams(
-                AuthConnection.GOOGLE,
-                authConnectionId = "w3ads", groupedAuthConnectionId = "aggregate-mobile"
+                selectedLoginProvider,
+                //authConnectionId = "w3ads",
+                //groupedAuthConnectionId = "aggregate-mobile",
+                loginHint = loginHint,
             ), ctx = this.applicationContext
         )
         loginCompletableFuture.whenComplete { _, error ->
@@ -184,15 +186,17 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         val options = Web3AuthOptions(
             clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ",
             web3AuthNetwork = Web3AuthNetwork.SAPPHIRE_MAINNET,
-            redirectUrl = Uri.parse("torusapp://org.torusresearch.web3authexample"),
+            redirectUrl = "torusapp://org.torusresearch.web3authexample",
             //sdkUrl = "https://auth.mocaverse.xyz",
             //walletSdkUrl = "https://lrc-mocaverse.web3auth.io",
-            whiteLabel = WhiteLabelData(
-                "Web3Auth Sample App", null, null, null,
-                Language.EN, ThemeModes.LIGHT, true,
-                hashMapOf(
-                    "primary" to "#123456",
-                    "onPrimary" to "#0000FF"
+            walletServicesConfig = WalletServicesConfig(
+                whiteLabel = WhiteLabelData(
+                    "Web3Auth Sample App", null, null, null,
+                    Language.EN, ThemeModes.LIGHT, true,
+                    hashMapOf(
+                        "primary" to "#123456",
+                        "onPrimary" to "#0000FF"
+                    )
                 )
             ),
             authConnectionConfig = authConfig,
@@ -240,16 +244,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
         val launchWalletButton = findViewById<Button>(R.id.launchWalletButton)
         launchWalletButton.setOnClickListener {
-            val launchWalletCompletableFuture = web3Auth.showWalletUI(
-                chainConfig = listOf(
-                    Chains(
-                        chainId = "0x89",
-                        rpcTarget = "https://1rpc.io/matic",
-                        chainNamespace = ChainNamespace.EIP155
-                    )
-                ),
-                chainId = "0x89",
-            )
+            val launchWalletCompletableFuture = web3Auth.showWalletUI()
             launchWalletCompletableFuture.whenComplete { _, error ->
                 if (error == null) {
                     Log.d("MainActivity_Web3Auth", "Wallet launched successfully")
@@ -268,11 +263,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 add("Android")
             }
             val signMsgCompletableFuture = web3Auth.request(
-                chainConfig = Chains(
-                    chainId = "0x89",
-                    rpcTarget = "https://polygon-rpc.com/",
-                    chainNamespace = ChainNamespace.EIP155
-                ), "personal_sign", requestParams = params, appState = "web3Auth"
+                "personal_sign", requestParams = params, appState = "web3Auth"
             )
             signMsgCompletableFuture.whenComplete { signResult, error ->
                 if (error == null) {
