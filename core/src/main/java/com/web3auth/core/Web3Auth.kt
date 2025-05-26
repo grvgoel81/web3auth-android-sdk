@@ -42,6 +42,7 @@ import org.json.JSONObject
 import org.torusresearch.fetchnodedetails.FetchNodeDetails
 import org.torusresearch.fetchnodedetails.types.NodeDetails
 import org.torusresearch.torusutils.TorusUtils
+import org.torusresearch.torusutils.types.VerifierParams
 import org.torusresearch.torusutils.types.common.SessionToken
 import org.torusresearch.torusutils.types.common.TorusKey
 import org.torusresearch.torusutils.types.common.TorusOptions
@@ -230,7 +231,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             if (err == null) {
                 //authorize session
                 sessionManager.setSessionId(SessionManager.getSessionIdFromStorage())
-                this.authorizeSession(web3AuthOption.redirectUrl.toString(), baseContext)
+                this.authorizeSession(web3AuthOption.redirectUrl, baseContext)
                     .whenComplete { resp, error ->
                         runOnUIThread {
                             if (error == null) {
@@ -398,10 +399,10 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
 
     }
 
-    fun connect(
+    private fun connect(
         loginParams: LoginParams,
         ctx: Context
-    ): Web3AuthResponse {
+    ) {
         val torusKey = getTorusKey(loginParams)
 
         val publicAddress = torusKey.finalKeyData?.walletAddress
@@ -422,14 +423,14 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     profileImage = it?.getClaim("picture")?.asString() ?: "",
                     authConnectionId = loginParams.authConnectionId.toString(),
                     authConnection = AuthConnection.CUSTOM.name.lowercase(Locale.ROOT),
-                    userId = it?.getClaim("userId")?.asString() ?: "",
+                    userId = it?.getClaim("email")?.asString() ?: "",
                 )
             }
         } catch (e: Exception) {
             throw Exception(Web3AuthError.getError(ErrorCode.INVALID_LOGIN))
         }
 
-        val web3AuthResponse = Web3AuthResponse(
+        val response = Web3AuthResponse(
             privateKey = privateKey.toString(),
             signatures = getSignatureData(torusKey.sessionData.sessionTokenData),
             userInfo = decodedUserInfo
@@ -437,15 +438,16 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
 
         val sessionId = SessionManager.generateRandomSessionKey()
         sessionManager.setSessionId(sessionId)
-        sessionManager.createSession(gson.toJson(web3AuthResponse), ctx)
+        sessionManager.createSession(gson.toJson(response), ctx)
             .whenComplete { result, err ->
                 if (err == null) {
+                    web3AuthResponse = response
                     SessionManager.saveSessionIdToStorage(result)
                     sessionManager.setSessionId(result)
+                    if (::loginCompletableFuture.isInitialized)
+                        loginCompletableFuture.complete(web3AuthResponse)
                 }
             }
-
-        return web3AuthResponse
     }
 
     private fun getTorusKey(
@@ -494,6 +496,15 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             )
         }*/
 
+        val verifierParams = VerifierParams(userId.toString(), null, null, null)
+        retrieveSharesResponse = torusUtils.retrieveShares(
+            nodeDetails.torusNodeEndpoints,
+            loginParams.authConnectionId.toString(),
+            verifierParams,
+            loginParams.idToken.toString(),
+            null
+        )
+
         val isUpgraded = retrieveSharesResponse.metadata?.isUpgraded
 
         if (isUpgraded == true) {
@@ -511,10 +522,10 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         }
     }
 
-    fun getUserIdFromJWT(token: String): String? {
+    private fun getUserIdFromJWT(token: String): String? {
         return try {
             val jwt = JWT(token)
-            jwt.getClaim("userId").asString()
+            jwt.getClaim("email").asString()
         } catch (e: Exception) {
             e.printStackTrace()
             null

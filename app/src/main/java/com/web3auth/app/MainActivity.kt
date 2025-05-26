@@ -61,7 +61,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     private val gson = Gson()
     private var TEST_VERIFIER = "torus-test-health"
     private var TORUS_TEST_EMAIL = "hello@tor.us"
-    private var SFA_ClientId = "YOUR_CLIENT_ID"
 
     private fun signIn() {
         val hintEmailEditText = findViewById<EditText>(R.id.etEmailHint)
@@ -90,13 +89,42 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 //authConnectionId = "w3ads",
                 //groupedAuthConnectionId = "aggregate-mobile",
                 loginHint = loginHint,
-            ), ctx = this.applicationContext
+            ), ctx = this
         )
         loginCompletableFuture.whenComplete { _, error ->
             if (error == null) {
                 reRender()
                 println("PrivKey: " + web3Auth.getPrivateKey())
                 println("ed25519PrivKey: " + web3Auth.getEd25519PrivateKey())
+                println("Web3Auth UserInfo" + web3Auth.getUserInfo())
+            } else {
+                Log.d("MainActivity_Web3Auth", error.message ?: "Something went wrong")
+            }
+        }
+    }
+
+    private fun sfaSignIn() {
+        val idToken = JwtUtils.generateIdToken(TORUS_TEST_EMAIL)
+        val web3AuthOptions =
+            Web3AuthOptions(
+                clientId = "YOUR_CLIENT_ID",
+                web3AuthNetwork = Web3AuthNetwork.SAPPHIRE_MAINNET,
+                redirectUrl = "torusapp://org.torusresearch.web3authexample"
+            )
+        web3Auth = Web3Auth(
+            web3AuthOptions, this
+        )
+        val loginCompletableFuture: CompletableFuture<Web3AuthResponse> = web3Auth.connectTo(
+            LoginParams(
+                authConnection = selectedLoginProvider,
+                authConnectionId = TEST_VERIFIER,
+                idToken = idToken
+            ), ctx = this
+        )
+        loginCompletableFuture.whenComplete { _, error ->
+            if (error == null) {
+                //reRender()
+                println("PrivKey: " + web3Auth.getPrivateKey())
                 println("Web3Auth UserInfo" + web3Auth.getUserInfo())
             } else {
                 Log.d("MainActivity_Web3Auth", error.message ?: "Something went wrong")
@@ -238,6 +266,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         // Setup UI and event handlers
         val signInButton = findViewById<Button>(R.id.signInButton)
         signInButton.setOnClickListener { signIn() }
+
+        val sfaSignInButton = findViewById<Button>(R.id.sfaSignInButton)
+        sfaSignInButton.setOnClickListener { sfaSignIn() }
 
         val signOutButton = findViewById<Button>(R.id.signOutButton)
         signOutButton.setOnClickListener { signOut() }
