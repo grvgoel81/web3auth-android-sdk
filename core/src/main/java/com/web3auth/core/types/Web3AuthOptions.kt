@@ -1,27 +1,35 @@
 package com.web3auth.core.types
 
-import android.net.Uri
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
+import org.torusresearch.fetchnodedetails.types.Web3AuthNetwork
 
 @Keep
 data class Web3AuthOptions(
-    val clientId: String,
+    @Keep val clientId: String,
+    @Keep var redirectUrl: String,
+    @Keep var originData: Map<String, String>? = null,
+    @SerializedName("buildEnv")
+    @Keep var authBuildEnv: BuildEnv = BuildEnv.PRODUCTION,
+    @Keep var sdkUrl: String = getSdkUrl(authBuildEnv),
+    @Keep var storageServerUrl: String? = null,
+    @Keep var sessionSocketUrl: String? = null,
+    @Keep val authConnectionConfig: List<AuthConnectionConfig>? = emptyList(),
+    @Keep var dashboardUrl: String? = getDashboardUrl(authBuildEnv),
+    @Keep var accountAbstractionConfig: String? = null,
+    @Keep var walletSdkUrl: String? = getWalletSdkUrl(authBuildEnv),
+    @Keep var sessionNamespace: String? = null,
+    @Keep var includeUserDataInToken: Boolean? = true,
+    @Keep var chains: Chains? = null,
+    @Keep var defaultChainId: String? = null,
+    @Keep var enableLogging: Boolean = false,
+    @Keep val sessionTime: Int = 30 * 86400,
     @SerializedName("network")
-    val web3AuthNetwork: Web3AuthNetwork,
-    var authBuildEnv: BuildEnv? = BuildEnv.PRODUCTION,
-    @Transient var redirectUrl: Uri,
-    var sdkUrl: String = getSdkUrl(authBuildEnv),
-    var whiteLabel: WhiteLabelData? = null,
-    val authConnectionConfig: List<AuthConnectionConfig>? = emptyList(),
-    val useCoreKitKey: Boolean? = false,
-    val chainNamespace: ChainNamespace? = ChainNamespace.EIP155,
-    val mfaSettings: MfaSettings? = null,
-    val sessionTime: Int? = 30 * 86400,
-    var walletSdkUrl: String? = getWalletSdkUrl(authBuildEnv),
-    var dashboardUrl: String? = getDashboardUrl(authBuildEnv),
-    var originData: Map<String, String>? = null,
-    var includeUserDataInToken: Boolean? = true,
+    @Keep val web3AuthNetwork: Web3AuthNetwork,
+    @Keep val useSFAKey: Boolean? = false,
+    @Keep val walletServicesConfig: WalletServicesConfig? = null,
+    //@Keep val chainNamespace: ChainNamespace? = ChainNamespace.EIP155,
+    @Keep val mfaSettings: MfaSettings? = null,
 ) {
     init {
         if (dashboardUrl == null) {

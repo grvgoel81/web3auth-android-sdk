@@ -17,4 +17,5 @@ data class AuthConnectionConfig(
     @Keep var showOnModal: Boolean? = true,
     @Keep var showOnDesktop: Boolean? = true,
     @Keep var showOnMobile: Boolean? = true,
+    @Keep val jwtParameters: ExtraLoginOptions? = null,
 )

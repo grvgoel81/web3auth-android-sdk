@@ -5,17 +5,17 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import com.google.gson.GsonBuilder
-import com.web3auth.core.types.Web3AuthNetwork
 import com.web3auth.session_manager_android.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.torusresearch.fetchnodedetails.types.Web3AuthNetwork
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiHelper {
     // TODO: Abstract this to a single common source, i.e torus-common, then add these to here and fetch-node-details, etc respectively
-    val SIGNER_MAP: Map<Web3AuthNetwork, String> = mapOf(
+    private val SIGNER_MAP: Map<Web3AuthNetwork, String> = mapOf(
         Web3AuthNetwork.MAINNET to "https://signer.web3auth.io",
         Web3AuthNetwork.TESTNET to "https://signer.web3auth.io",
         Web3AuthNetwork.CYAN to "https://signer-polygon.web3auth.io",
