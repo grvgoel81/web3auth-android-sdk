@@ -494,7 +494,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     private fun getUserIdFromJWT(token: String): String? {
         return try {
             val jwt = JWT(token)
-            jwt.getClaim("email").asString()
+            jwt.getClaim("user_id").asString()
         } catch (e: Exception) {
             e.printStackTrace()
             null
