@@ -50,6 +50,10 @@ object Web3AuthError {
             ErrorCode.USER_ALREADY_ENABLED_MFA -> {
                 "User has already enabled MFA"
             }
+
+            ErrorCode.PROJECT_CONFIG_NOT_FOUND_ERROR -> {
+                "Project configuration not found. Please check your project settings."
+            }
         }
     }
 }
@@ -66,5 +70,6 @@ enum class ErrorCode {
     MFA_ALREADY_ENABLED,
     MFA_NOT_ENABLED,
     USER_CANCELLED,
-    USER_ALREADY_ENABLED_MFA
+    USER_ALREADY_ENABLED_MFA,
+    PROJECT_CONFIG_NOT_FOUND_ERROR,
 }

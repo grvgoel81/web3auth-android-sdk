@@ -20,6 +20,7 @@ import com.web3auth.core.types.InitOptions
 import com.web3auth.core.types.InitParams
 import com.web3auth.core.types.LoginParams
 import com.web3auth.core.types.MFALevel
+import com.web3auth.core.types.ProjectConfigResponse
 import com.web3auth.core.types.REDIRECT_URL
 import com.web3auth.core.types.RedirectResponse
 import com.web3auth.core.types.RequestData
@@ -65,6 +66,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     private var web3AuthResponse: Web3AuthResponse? = null
     private var web3AuthOption = web3AuthOptions
     private var sessionManager: SessionManager
+    private var projectConfigResponse: ProjectConfigResponse? = null
 
     init {
         val torusOptions = TorusOptions(
@@ -659,10 +661,12 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         scope.launch {
             try {
                 val result = web3AuthApi.fetchProjectConfig(
-                    web3AuthOption.clientId,
-                    web3AuthOption.web3AuthNetwork.name.lowercase()
+                    project_id = web3AuthOption.clientId,
+                    network = web3AuthOption.web3AuthNetwork.name.lowercase(),
+                    build_env = web3AuthOption.authBuildEnv.name.lowercase()
                 )
                 if (result.isSuccessful && result.body() != null) {
+                    projectConfigResponse = result.body()
                     val response = result.body()
                     web3AuthOption.originData =
                         web3AuthOption.originData.mergeMaps(response?.whitelist?.signed_urls)
@@ -679,7 +683,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     projectConfigCompletableFuture.completeExceptionally(
                         Exception(
                             Web3AuthError.getError(
-                                ErrorCode.RUNTIME_ERROR
+                                ErrorCode.PROJECT_CONFIG_NOT_FOUND_ERROR
                             )
                         )
                     )
@@ -716,7 +720,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     /**
      * Launches the wallet services asynchronously.
      *
-     * @param chainConfig The configuration details of the blockchain web3AuthNetwork.
      * @param path The path where the wallet services will be launched. Default value is "wallet".
      * @return A CompletableFuture<Void> representing the asynchronous operation.
      */
@@ -729,6 +732,16 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             val sdkUrl = Uri.parse(web3AuthOption.walletSdkUrl)
 
             val initOptions = JSONObject(gson.toJson(web3AuthOption))
+
+            // If chains are not present in project config, throw an error
+            if (projectConfigResponse?.chains == null) {
+                throw Exception(Web3AuthError.getError(ErrorCode.PROJECT_CONFIG_NOT_FOUND_ERROR))
+            }
+
+            initOptions.put(
+                "chains", gson.toJson(projectConfigResponse?.chains)
+            )
+            initOptions.put("chainId", web3AuthOption.defaultChainId)
 
             val paramMap = JSONObject()
             paramMap.put(
@@ -771,7 +784,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     /**
      * Signs a message asynchronously.
      *
-     * @param chainConfig The configuration details of the blockchain web3AuthNetwork.
      * @param method The method name of the request.
      * @param requestParams The parameters of the request in JSON array format.
      * @param path The path where the signing service is located. Default value is "wallet/request".
@@ -789,8 +801,24 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         val sessionId = SessionManager.getSessionIdFromStorage()
         if (sessionId.isNotBlank()) {
             val sdkUrl = Uri.parse(web3AuthOption.walletSdkUrl)
-            //val chainConfigList = arrayListOf(chainConfig) TODO: remove
             val initOptions = JSONObject(gson.toJson(web3AuthOption))
+
+            // If chains are not present in project config, throw an error
+            if (projectConfigResponse?.chains == null) {
+                throw Exception(Web3AuthError.getError(ErrorCode.PROJECT_CONFIG_NOT_FOUND_ERROR))
+            }
+
+            initOptions.put(
+                "chains", gson.toJson(projectConfigResponse?.chains)
+            )
+            initOptions.put("chainId", web3AuthOption.defaultChainId)
+            initOptions.put(
+                "smartAccounts", JSONObject(gson.toJson(projectConfigResponse?.smartAccounts))
+            )
+            initOptions.put(
+                "embeddedWalletAuth",
+                JSONObject(gson.toJson(projectConfigResponse?.embeddedWalletAuth))
+            )
             val paramMap = JSONObject()
             paramMap.put(
                 "options", initOptions

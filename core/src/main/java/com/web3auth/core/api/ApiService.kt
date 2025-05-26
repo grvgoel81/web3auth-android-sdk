@@ -7,9 +7,9 @@ import retrofit2.http.Query
 
 interface ApiService {
 
-    @GET("/api/configuration")
+    @GET("/api/v2/configuration")
     suspend fun fetchProjectConfig(
         @Query("project_id") project_id: String, @Query("network") network: String,
-        @Query("whitelist") whitelist: String = "true"
+        @Query("build_env") build_env: String
     ): Response<ProjectConfigResponse>
 }

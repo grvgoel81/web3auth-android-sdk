@@ -109,7 +109,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             Web3AuthOptions(
                 clientId = "YOUR_CLIENT_ID",
                 web3AuthNetwork = Web3AuthNetwork.SAPPHIRE_MAINNET,
-                redirectUrl = "torusapp://org.torusresearch.web3authexample"
+                redirectUrl = "torusapp://org.torusresearch.web3authexample",
+                defaultChainId = "0x1",
             )
         web3Auth = Web3Auth(
             web3AuthOptions, this
@@ -146,6 +147,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     private fun reRender() {
         val contentTextView = findViewById<TextView>(R.id.contentTextView)
         val signInButton = findViewById<Button>(R.id.signInButton)
+        val sfaSignInButton = findViewById<Button>(R.id.sfaSignInButton)
         val signOutButton = findViewById<Button>(R.id.signOutButton)
         val launchWalletButton = findViewById<Button>(R.id.launchWalletButton)
         val signMsgButton = findViewById<Button>(R.id.signMsgButton)
@@ -169,6 +171,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             contentTextView.movementMethod = ScrollingMovementMethod()
             contentTextView.visibility = View.VISIBLE
             signInButton.visibility = View.GONE
+            sfaSignInButton.visibility = View.GONE
             signOutButton.visibility = View.VISIBLE
             launchWalletButton.visibility = View.VISIBLE
             signMsgButton.visibility = View.VISIBLE
@@ -180,6 +183,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             contentTextView.text = getString(R.string.not_logged_in)
             contentTextView.visibility = View.GONE
             signInButton.visibility = View.VISIBLE
+            sfaSignInButton.visibility = View.VISIBLE
             signOutButton.visibility = View.GONE
             btnSetUpMfa.visibility = View.GONE
             btnManageMfa.visibility = View.GONE
@@ -236,6 +240,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                             )
                         ),*/
             authBuildEnv = BuildEnv.TESTING,
+            defaultChainId = "0x1",
             sessionTime = 86400,
         )
 
