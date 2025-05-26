@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         )
         loginCompletableFuture.whenComplete { _, error ->
             if (error == null) {
-                //reRender()
+                reRender()
                 println("PrivKey: " + web3Auth.getPrivateKey())
                 println("Web3Auth UserInfo" + web3Auth.getUserInfo())
             } else {

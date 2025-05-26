@@ -16,8 +16,6 @@ import com.web3auth.core.keystore.KeyStoreManagerUtils
 import com.web3auth.core.types.AuthConnection
 import com.web3auth.core.types.ErrorCode
 import com.web3auth.core.types.ExtraLoginOptions
-import com.web3auth.core.types.InitOptions
-import com.web3auth.core.types.InitParams
 import com.web3auth.core.types.LoginParams
 import com.web3auth.core.types.MFALevel
 import com.web3auth.core.types.ProjectConfigResponse
@@ -91,42 +89,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         KeyStoreManagerUtils.getKeyGenerator()
     }
 
-    private fun getInitOptions(): InitOptions {
-        return InitOptions(
-            clientId = web3AuthOption.clientId,
-            network = web3AuthOption.web3AuthNetwork.name.lowercase(Locale.ROOT),
-            redirectUrl = web3AuthOption.redirectUrl.toString(),
-            whiteLabel = web3AuthOption.walletServicesConfig?.whiteLabel.let { gson.toJson(it) },
-            authConnectionConfig = web3AuthOption.authConnectionConfig?.let { gson.toJson(it) },
-            buildEnv = web3AuthOption.authBuildEnv.name.lowercase(Locale.ROOT),
-            mfaSettings = web3AuthOption.mfaSettings?.let { gson.toJson(it) },
-            sessionTime = web3AuthOption.sessionTime,
-            originData = web3AuthOption.originData?.let { gson.toJson(it) },
-            dashboardUrl = web3AuthOption.dashboardUrl
-        )
-    }
-
-    /**
-     * Retrieves the initialization parameters as a JSONObject.
-     *
-     * @param params The optional login parameters required for initialization. Default is null.
-     * @return The initialization parameters as a JSONObject.
-     */
-    private fun getInitParams(params: LoginParams?): InitParams {
-        return InitParams(
-            authConnection = params?.authConnection?.name?.lowercase(Locale.ROOT),
-            authConnectionId = params?.authConnectionId,
-            groupedAuthConnectionId = params?.groupedAuthConnectionId,
-            extraLoginOptions = params?.extraLoginOptions?.let { gson.toJson(it) },
-            redirectUrl = web3AuthOption.redirectUrl.toString(),
-            mfaLevel = params?.mfaLevel?.name?.lowercase(Locale.ROOT),
-            curve = params?.curve?.name?.lowercase(Locale.ROOT),
-            dappShare = params?.dappShare,
-            appState = params?.appState,
-            dappUrl = params?.dappUrl
-        )
-    }
-
     /**
      * Makes a request with the specified action type and login parameters.
      *
@@ -154,7 +116,9 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             web3AuthOption.web3AuthNetwork.toString().lowercase(Locale.ROOT)
         )
 
-        val initParamsJson = JSONObject(gson.toJson(params))
+        val initParamsJson = params?.let {
+            JSONObject(gson.toJson(it))
+        } ?: JSONObject()
 
         if (actionType == "manage_mfa") {
             initParamsJson.put("redirectUrl", web3AuthOption.dashboardUrl)
@@ -310,7 +274,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             sessionManager.setSessionId(sessionId)
 
             //Rehydrate Session
-            this.authorizeSession(web3AuthOption.redirectUrl.toString(), baseContext)
+            this.authorizeSession(web3AuthOption.redirectUrl, baseContext)
                 .whenComplete { resp, error ->
                     runOnUIThread {
                         if (error == null) {
@@ -360,7 +324,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
      * @param loginParams The login parameters required for authentication.
      * @return A CompletableFuture<Web3AuthResponse> representing the asynchronous operation, containing the Web3AuthResponse upon successful login.
      */
-    fun login(loginParams: LoginParams): CompletableFuture<Web3AuthResponse> {
+    private fun login(loginParams: LoginParams): CompletableFuture<Web3AuthResponse> {
         web3AuthOption.authConnectionConfig
             ?.firstOrNull()
             ?.let { config ->
@@ -443,12 +407,14 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         sessionManager.setSessionId(sessionId)
         sessionManager.createSession(gson.toJson(response), ctx)
             .whenComplete { result, err ->
-                if (err == null) {
-                    web3AuthResponse = response
-                    SessionManager.saveSessionIdToStorage(result)
-                    sessionManager.setSessionId(result)
-                    if (::loginCompletableFuture.isInitialized)
-                        loginCompletableFuture.complete(web3AuthResponse)
+                runOnUIThread {
+                    if (err == null) {
+                        web3AuthResponse = response
+                        SessionManager.saveSessionIdToStorage(result)
+                        sessionManager.setSessionId(result)
+                        if (::loginCompletableFuture.isInitialized)
+                            loginCompletableFuture.complete(web3AuthResponse)
+                    }
                 }
             }
     }
