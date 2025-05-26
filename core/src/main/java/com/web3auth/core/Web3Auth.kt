@@ -39,6 +39,7 @@ import com.web3auth.session_manager_android.SessionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONArray
 import org.json.JSONObject
 import org.torusresearch.fetchnodedetails.FetchNodeDetails
 import org.torusresearch.fetchnodedetails.types.NodeDetails
@@ -731,17 +732,25 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         if (savedSessionId.isNotBlank()) {
             val sdkUrl = Uri.parse(web3AuthOption.walletSdkUrl)
 
-            val initOptions = JSONObject(gson.toJson(web3AuthOption))
-
             // If chains are not present in project config, throw an error
             if (projectConfigResponse?.chains == null) {
                 throw Exception(Web3AuthError.getError(ErrorCode.PROJECT_CONFIG_NOT_FOUND_ERROR))
             }
-
-            initOptions.put(
-                "chains", gson.toJson(projectConfigResponse?.chains)
-            )
-            initOptions.put("chainId", web3AuthOption.defaultChainId)
+            val initOptions = JSONObject(gson.toJson(web3AuthOption)).apply {
+                put("network", web3AuthOption.web3AuthNetwork.toString().lowercase(Locale.ROOT))
+                projectConfigResponse?.chains?.let {
+                    put("chains", gson.toJson(it))
+                }
+                web3AuthOption.defaultChainId?.let {
+                    put("chainId", it)
+                }
+                projectConfigResponse?.embeddedWalletAuth?.let {
+                    put("embeddedWalletAuth", JSONArray(gson.toJson(it)))
+                }
+                projectConfigResponse?.smartAccounts?.let {
+                    put("smartAccounts", JSONObject(gson.toJson(it)))
+                }
+            }
 
             val paramMap = JSONObject()
             paramMap.put(
@@ -801,24 +810,29 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         val sessionId = SessionManager.getSessionIdFromStorage()
         if (sessionId.isNotBlank()) {
             val sdkUrl = Uri.parse(web3AuthOption.walletSdkUrl)
-            val initOptions = JSONObject(gson.toJson(web3AuthOption))
 
             // If chains are not present in project config, throw an error
             if (projectConfigResponse?.chains == null) {
                 throw Exception(Web3AuthError.getError(ErrorCode.PROJECT_CONFIG_NOT_FOUND_ERROR))
             }
 
-            initOptions.put(
-                "chains", gson.toJson(projectConfigResponse?.chains)
-            )
-            initOptions.put("chainId", web3AuthOption.defaultChainId)
-            initOptions.put(
-                "smartAccounts", JSONObject(gson.toJson(projectConfigResponse?.smartAccounts))
-            )
-            initOptions.put(
-                "embeddedWalletAuth",
-                JSONObject(gson.toJson(projectConfigResponse?.embeddedWalletAuth))
-            )
+            val initOptions = JSONObject(gson.toJson(web3AuthOption))
+            initOptions.apply {
+                put("network", web3AuthOption.web3AuthNetwork.toString().lowercase(Locale.ROOT))
+                projectConfigResponse?.chains?.let {
+                    put("chains", gson.toJson(it))
+                }
+                web3AuthOption.defaultChainId?.let {
+                    put("chainId", it)
+                }
+                projectConfigResponse?.embeddedWalletAuth?.let {
+                    initOptions.put("embeddedWalletAuth", JSONArray(gson.toJson(it)))
+                }
+                projectConfigResponse?.smartAccounts?.let {
+                    put("smartAccounts", JSONObject(gson.toJson(it)))
+                }
+            }
+
             val paramMap = JSONObject()
             paramMap.put(
                 "options", initOptions
