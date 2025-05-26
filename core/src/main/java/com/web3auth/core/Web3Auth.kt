@@ -77,7 +77,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         sessionManager = SessionManager(
             context,
             web3AuthOptions.sessionTime,
-            context.packageName,
+            web3AuthOptions.redirectUrl,
             sessionNamespace = if (web3AuthOptions.sessionNamespace?.isNotEmpty() == true) web3AuthOptions.sessionNamespace else ""
         )
     }
@@ -710,6 +710,9 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 web3AuthOption.defaultChainId?.let {
                     put("chainId", it)
                 }
+                web3AuthOption.sessionNamespace?.let {
+                    put("sessionNamespace", "sfa")
+                }
                 projectConfigResponse?.embeddedWalletAuth?.let {
                     put("embeddedWalletAuth", JSONArray(gson.toJson(it)))
                 }
@@ -791,6 +794,9 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 web3AuthOption.defaultChainId?.let {
                     put("chainId", it)
                 }
+                web3AuthOption.sessionNamespace?.let {
+                    put("sessionNamespace", "sfa")
+                }
                 projectConfigResponse?.embeddedWalletAuth?.let {
                     initOptions.put("embeddedWalletAuth", JSONArray(gson.toJson(it)))
                 }
@@ -831,7 +837,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     //print("message signing url: => $url")
                     val intent = Intent(baseContext, WebViewActivity::class.java)
                     intent.putExtra(WEBVIEW_URL, url.toString())
-                    intent.putExtra(REDIRECT_URL, web3AuthOption.redirectUrl.toString())
+                    intent.putExtra(REDIRECT_URL, web3AuthOption.redirectUrl)
                     baseContext.startActivity(intent)
                 }
             }
