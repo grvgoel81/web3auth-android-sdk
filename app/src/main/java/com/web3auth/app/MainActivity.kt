@@ -60,7 +60,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
     private val gson = Gson()
     private var TEST_VERIFIER = "torus-test-health"
-    private var TORUS_TEST_EMAIL = "hello@tor.us"
+    private var TORUS_TEST_EMAIL = "devnettestuser@tor.us"
+    var TEST_AGGREGRATE_VERIFIER = "torus-aggregate-sapphire-mainnet"
 
     private fun signIn() {
         val hintEmailEditText = findViewById<EditText>(R.id.etEmailHint)
@@ -119,7 +120,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             LoginParams(
                 authConnection = selectedLoginProvider,
                 authConnectionId = TEST_VERIFIER,
-                idToken = idToken
+                idToken = idToken,
+                groupedAuthConnectionId = TEST_AGGREGRATE_VERIFIER,
             ), ctx = this
         )
         loginCompletableFuture.whenComplete { _, error ->

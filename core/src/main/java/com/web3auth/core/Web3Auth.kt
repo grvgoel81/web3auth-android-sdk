@@ -30,6 +30,7 @@ import com.web3auth.core.types.WEBVIEW_URL
 import com.web3auth.core.types.Web3AuthError
 import com.web3auth.core.types.Web3AuthOptions
 import com.web3auth.core.types.Web3AuthResponse
+import com.web3auth.core.types.Web3AuthSubVerifierInfo
 import com.web3auth.core.types.WebViewResultCallback
 import com.web3auth.session_manager_android.SessionManager
 import kotlinx.coroutines.CoroutineScope
@@ -41,9 +42,11 @@ import org.torusresearch.fetchnodedetails.FetchNodeDetails
 import org.torusresearch.fetchnodedetails.types.NodeDetails
 import org.torusresearch.torusutils.TorusUtils
 import org.torusresearch.torusutils.types.VerifierParams
+import org.torusresearch.torusutils.types.VerifyParams
 import org.torusresearch.torusutils.types.common.SessionToken
 import org.torusresearch.torusutils.types.common.TorusKey
 import org.torusresearch.torusutils.types.common.TorusOptions
+import org.web3j.crypto.Hash
 import java.util.Locale
 import java.util.concurrent.CompletableFuture
 
@@ -358,8 +361,25 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             isSFA = false
         } else {
             isSFA = true
+            loginParams.groupedAuthConnectionId?.let {
+                if (it.isNullOrEmpty()) {
+                    connect(loginParams, ctx)
+                } else {
+                    val _loginParams = LoginParams(
+                        AuthConnection.GOOGLE,
+                        authConnectionId = loginParams.groupedAuthConnectionId,
+                        idToken = loginParams.idToken
+                    )
+                    val subVerifierInfoArray = arrayOf(
+                        Web3AuthSubVerifierInfo(
+                            loginParams.authConnectionId.toString(),
+                            idToken = loginParams.idToken.toString()
+                        )
+                    )
+                    connect(_loginParams, ctx, subVerifierInfoArray = subVerifierInfoArray)
+                }
+            }
             connect(loginParams, ctx) // SFA login
-            loginParams
         }
 
         loginCompletableFuture = CompletableFuture()
@@ -369,9 +389,16 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
 
     private fun connect(
         loginParams: LoginParams,
-        ctx: Context
+        ctx: Context,
+        subVerifierInfoArray: Array<Web3AuthSubVerifierInfo>? = null,
     ) {
-        val torusKey = getTorusKey(loginParams)
+        val torusKey = subVerifierInfoArray.let {
+            if (it.isNullOrEmpty()) {
+                getTorusKey(loginParams)
+            } else {
+                getTorusKey(loginParams, it)
+            }
+        }
 
         val publicAddress = torusKey.finalKeyData?.walletAddress
         val privateKey = if (torusKey.finalKeyData?.privKey?.isEmpty() == true) {
@@ -421,7 +448,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     }
 
     private fun getTorusKey(
-        loginParams: LoginParams
+        loginParams: LoginParams,
+        subVerifierInfoArray: Array<Web3AuthSubVerifierInfo>? = null
     ): TorusKey {
         lateinit var retrieveSharesResponse: TorusKey
 
@@ -430,12 +458,12 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             nodeDetailManager.getNodeDetails(loginParams.authConnectionId, userId)
                 .get()
 
-        /*loginParams.subVerifierInfoArray?.let {
+        subVerifierInfoArray?.let {
             val aggregateIdTokenSeeds: ArrayList<String> = ArrayList()
             val subVerifierIds: ArrayList<String> = ArrayList()
             val verifyParams: ArrayList<VerifyParams> = ArrayList()
 
-            for(value: TorusSubVerifierInfo in it) {
+            for (value: Web3AuthSubVerifierInfo in it) {
                 aggregateIdTokenSeeds.add(value.idToken)
                 val verifyParam = VerifyParams(userId, value.idToken)
                 verifyParams.add(verifyParam)
@@ -443,11 +471,17 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             }
 
             aggregateIdTokenSeeds.sort()
-            val verifierParams = VerifierParams(userId.toString(), null,
+            val verifierParams = VerifierParams(
+                userId.toString(), null,
                 subVerifierIds.toTypedArray(), verifyParams.toTypedArray()
             )
 
-            val aggregateIdToken = Hash.sha3String(java.lang.String.join(29.toChar().toString(), aggregateIdTokenSeeds)).replace("0x", "")
+            val aggregateIdToken = Hash.sha3String(
+                java.lang.String.join(
+                    29.toChar().toString(),
+                    aggregateIdTokenSeeds
+                )
+            ).replace("0x", "")
             retrieveSharesResponse = torusUtils.retrieveShares(
                 nodeDetails.torusNodeEndpoints,
                 loginParams.authConnectionId.toString(),
@@ -455,7 +489,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 aggregateIdToken,
                 null
             )
-        } ?: run{
+        } ?: run {
             val verifierParams = VerifierParams(userId.toString(), null, null, null)
             retrieveSharesResponse = torusUtils.retrieveShares(
                 nodeDetails.torusNodeEndpoints,
@@ -464,16 +498,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 loginParams.idToken.toString(),
                 null
             )
-        }*/
-
-        val verifierParams = VerifierParams(userId.toString(), null, null, null)
-        retrieveSharesResponse = torusUtils.retrieveShares(
-            nodeDetails.torusNodeEndpoints,
-            loginParams.authConnectionId.toString(),
-            verifierParams,
-            loginParams.idToken.toString(),
-            null
-        )
+        }
 
         val isUpgraded = retrieveSharesResponse.metadata?.isUpgraded
 
