@@ -391,7 +391,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     profileImage = it?.getClaim("picture")?.asString() ?: "",
                     authConnectionId = loginParams.authConnectionId.toString(),
                     authConnection = AuthConnection.CUSTOM.name.lowercase(Locale.ROOT),
-                    userId = it?.getClaim("email")?.asString() ?: "",
+                    userId = it?.getClaim("user_id")?.asString() ?: "",
                 )
             }
         } catch (e: Exception) {
