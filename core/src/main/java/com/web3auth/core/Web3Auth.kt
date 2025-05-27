@@ -713,9 +713,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 web3AuthOption.defaultChainId?.let {
                     put("chainId", it)
                 }
-                if (isSFA) {
-                    put("sessionNamespace", "sfa")
-                }
                 projectConfigResponse?.embeddedWalletAuth?.let {
                     put("embeddedWalletAuth", JSONArray(gson.toJson(it)))
                 }
@@ -739,6 +736,9 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     )
                     walletMap.addProperty("sessionId", savedSessionId)
                     walletMap.addProperty("platform", "android")
+                    if (isSFA) {
+                        walletMap.addProperty("sessionNamespace", "sfa")
+                    }
 
                     val walletHash =
                         "b64Params=" + gson.toJson(walletMap).toByteArray(Charsets.UTF_8)
@@ -796,9 +796,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 }
                 web3AuthOption.defaultChainId?.let {
                     put("chainId", it)
-                }
-                if (isSFA) {
-                    put("sessionNamespace", "sfa")
                 }
                 projectConfigResponse?.embeddedWalletAuth?.let {
                     initOptions.put("embeddedWalletAuth", JSONArray(gson.toJson(it)))
