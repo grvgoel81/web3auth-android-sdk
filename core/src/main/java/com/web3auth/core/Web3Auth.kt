@@ -710,9 +710,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 web3AuthOption.defaultChainId?.let {
                     put("chainId", it)
                 }
-                web3AuthOption.sessionNamespace?.let {
+                if (web3AuthOption.useSFAKey == true)
                     put("sessionNamespace", "sfa")
-                }
                 projectConfigResponse?.embeddedWalletAuth?.let {
                     put("embeddedWalletAuth", JSONArray(gson.toJson(it)))
                 }
