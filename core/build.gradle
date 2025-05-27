@@ -90,11 +90,19 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
 
-project.afterEvaluate {
+afterEvaluate {
+    // 1. Define the sources JAR task
+    task androidSourcesJar(type: Jar) {
+        archiveClassifier.set("sources")
+        from android.sourceSets.main.java.srcDirs
+    }
+
+    // 2. Add sources JAR to the publishing
     publishing {
         publications {
             release(MavenPublication) {
                 from components.release
+                artifact androidSourcesJar
             }
         }
     }
