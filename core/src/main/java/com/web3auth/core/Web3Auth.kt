@@ -21,9 +21,7 @@ import com.web3auth.core.types.MFALevel
 import com.web3auth.core.types.ProjectConfigResponse
 import com.web3auth.core.types.REDIRECT_URL
 import com.web3auth.core.types.RedirectResponse
-import com.web3auth.core.types.RequestData
 import com.web3auth.core.types.SessionResponse
-import com.web3auth.core.types.SignMessage
 import com.web3auth.core.types.SignResponse
 import com.web3auth.core.types.UnKnownException
 import com.web3auth.core.types.UserCancelledException
@@ -736,10 +734,9 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     )
                     walletMap.addProperty("sessionId", savedSessionId)
                     walletMap.addProperty("platform", "android")
-                    if (isSFA) {
-                        walletMap.addProperty("sessionNamespace", "sfa")
+                    web3AuthOption.sessionNamespace?.let {
+                        walletMap.addProperty("sessionNamespace", it)
                     }
-
                     val walletHash =
                         "b64Params=" + gson.toJson(walletMap).toByteArray(Charsets.UTF_8)
                             .toBase64URLString()
@@ -815,15 +812,20 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
 
             loginIdCf.whenComplete { loginId, error ->
                 if (error == null) {
-                    val signMessageMap = SignMessage(
-                        loginId = loginId,
-                        sessionId = sessionId,
-                        request = RequestData(
-                            method = method,
-                            params = gson.toJson(requestParams)
+                    val signMessageMap = mutableMapOf<String, Any>(
+                        "loginId" to loginId,
+                        "sessionId" to sessionId,
+                        "request" to mapOf(
+                            "method" to method,
+                            "params" to gson.toJson(requestParams)
                         ),
-                        appState = appState.let { it }
+                        "appState" to gson.toJson(appState)
                     )
+
+                    web3AuthOption.sessionNamespace?.let {
+                        signMessageMap["sessionNamespace"] = it
+                    }
+
 
                     val signMessageHash =
                         "b64Params=" + gson.toJson(signMessageMap).toByteArray(Charsets.UTF_8)
