@@ -840,6 +840,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     val signMessageMap = mutableMapOf<String, Any>(
                         "loginId" to loginId,
                         "sessionId" to sessionId,
+                        "platform" to "android",
                         "request" to mapOf(
                             "method" to method,
                             "params" to gson.toJson(requestParams)
