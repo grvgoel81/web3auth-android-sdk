@@ -23,8 +23,7 @@ data class ProjectConfigResponse(
     @Keep val wallet_connect_enabled: Boolean,
     @Keep val wallet_connect_project_id: String?,
     @Keep val whitelabel: WhiteLabelData? = null,
-
-    )
+)
 
 @Keep
 data class SmartAccountsConfig(
