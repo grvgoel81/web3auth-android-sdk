@@ -67,7 +67,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     private var web3AuthOption = web3AuthOptions
     private var sessionManager: SessionManager
     private var projectConfigResponse: ProjectConfigResponse? = null
-    private var isSFA: Boolean = false
 
     init {
         val torusOptions = TorusOptions(
@@ -358,9 +357,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             }.also {
                 login(it) // PnP login
             }
-            isSFA = false
         } else {
-            isSFA = true
             loginParams.groupedAuthConnectionId?.let {
                 if (it.isNullOrEmpty()) {
                     connect(loginParams, ctx)
