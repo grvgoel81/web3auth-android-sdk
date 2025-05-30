@@ -11,7 +11,7 @@ data class WhitelistResponse(
 
 @Keep
 data class ProjectConfigResponse(
-    @Keep var userDataIncludedInToken: Boolean? = true,
+    @Keep var userDataInIdToken: Boolean? = true,
     @Keep val sessionTime: Int? = 30 * 86400,
     @Keep val enableKeyExport: Boolean? = false,
     @Keep val whitelist: WhitelistResponse?,
@@ -19,9 +19,9 @@ data class ProjectConfigResponse(
     @Keep val smartAccounts: SmartAccountsConfig? = null,
     @Keep val walletUiConfig: WalletUiConfig? = null,
     @Keep val embeddedWalletAuth: List<AuthConnectionConfig>? = null,
-    @Keep val sms_otp_enabled: Boolean,
-    @Keep val wallet_connect_enabled: Boolean,
-    @Keep val wallet_connect_project_id: String?,
+    @Keep val sms_otp_enabled: Boolean?,
+    @Keep val wallet_connect_enabled: Boolean?,
+    @Keep val walletConnectProjectId: String?,
     @Keep val whitelabel: WhiteLabelData? = null,
 )
 
