@@ -12,7 +12,7 @@ data class LoginParams(
     @Keep val extraLoginOptions: ExtraLoginOptions? = null,
     @Keep var dappShare: String? = null,
     @Keep val curve: Curve? = Curve.SECP256K1,
-    @Keep val dappUrl: String? = null,
+    @Keep var dappUrl: String? = null,
     @Keep var loginHint: String? = null,
     @Keep val idToken: String? = null,
 )

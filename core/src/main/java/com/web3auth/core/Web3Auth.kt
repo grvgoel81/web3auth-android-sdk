@@ -67,7 +67,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     private var web3AuthOption = web3AuthOptions
     private var sessionManager: SessionManager
     private var projectConfigResponse: ProjectConfigResponse? = null
-    private var isSFA: Boolean = false
 
     init {
         val torusOptions = TorusOptions(
@@ -102,6 +101,17 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     ) {
         val sdkUrl = Uri.parse(web3AuthOption.sdkUrl)
 
+        val initParamsJson = params?.let {
+            JSONObject(gson.toJson(it))
+        } ?: JSONObject()
+
+        if (actionType == "manage_mfa") {
+            initParamsJson.put("redirectUrl", web3AuthOption.dashboardUrl)
+            initParamsJson.put("dappUrl", web3AuthOption.redirectUrl)
+        } else {
+            initParamsJson.put("redirectUrl", web3AuthOption.redirectUrl)
+        }
+
         val redirectUrl = if (actionType == "manage_mfa") {
             web3AuthOption.dashboardUrl
         } else {
@@ -118,16 +128,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             web3AuthOption.web3AuthNetwork.toString().lowercase(Locale.ROOT)
         )
 
-        val initParamsJson = params?.let {
-            JSONObject(gson.toJson(it))
-        } ?: JSONObject()
-
-        if (actionType == "manage_mfa") {
-            initParamsJson.put("redirectUrl", web3AuthOption.dashboardUrl)
-        } else {
-            initParamsJson.put("redirectUrl", web3AuthOption.redirectUrl)
-        }
-
         val sessionId = SessionManager.generateRandomSessionKey()
 
         val paramMap = JSONObject()
@@ -139,7 +139,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         if (actionType == "enable_mfa" || actionType == "manage_mfa") {
             val userInfo = web3AuthResponse?.userInfo
             initParamsJson.put("authConnection", userInfo?.authConnection)
-            var extraOptionsString = ""
+            val extraOptionsString: String
             var existingExtraLoginOptions = ExtraLoginOptions()
             if (initParamsJson.has("extraLoginOptions")) {
                 extraOptionsString = initParamsJson.getString("extraLoginOptions")
@@ -154,7 +154,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 "appState",
                 gson.toJson(loginIdObject).toByteArray(Charsets.UTF_8).toBase64URLString()
             )
-            initParamsJson.put("dappUrl", web3AuthOption.redirectUrl)
             paramMap.put("sessionId", sessionManager.getSessionId())
         }
         paramMap.put("params", initParamsJson)
@@ -358,9 +357,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             }.also {
                 login(it) // PnP login
             }
-            isSFA = false
         } else {
-            isSFA = true
             loginParams.groupedAuthConnectionId?.let {
                 if (it.isNullOrEmpty()) {
                     connect(loginParams, ctx)
@@ -400,7 +397,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             }
         }
 
-        val publicAddress = torusKey.finalKeyData?.walletAddress
         val privateKey = if (torusKey.finalKeyData?.privKey?.isEmpty() == true) {
             torusKey.getoAuthKeyData().privKey
         } else {

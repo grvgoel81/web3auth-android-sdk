@@ -28,7 +28,6 @@ data class Web3AuthOptions(
     @Keep val web3AuthNetwork: Web3AuthNetwork,
     @Keep val useSFAKey: Boolean? = false,
     @Keep val walletServicesConfig: WalletServicesConfig? = null,
-    //@Keep val chainNamespace: ChainNamespace? = ChainNamespace.EIP155,
     @Keep val mfaSettings: MfaSettings? = null,
 ) {
     init {
