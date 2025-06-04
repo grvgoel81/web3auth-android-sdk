@@ -342,8 +342,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     }
 
     fun connectTo(
-        loginParams: LoginParams,
-        ctx: Context
+        loginParams: LoginParams
     ): CompletableFuture<Web3AuthResponse> {
         if (loginParams.idToken.isNullOrEmpty()) {
             if (!loginParams.loginHint.isNullOrEmpty()) {
@@ -360,7 +359,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         } else {
             loginParams.groupedAuthConnectionId?.let {
                 if (it.isNullOrEmpty()) {
-                    connect(loginParams, ctx)
+                    connect(loginParams, baseContext)
                 } else {
                     val _loginParams = LoginParams(
                         AuthConnection.GOOGLE,
@@ -373,15 +372,18 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                             idToken = loginParams.idToken.toString()
                         )
                     )
-                    connect(_loginParams, ctx, subVerifierInfoArray = subVerifierInfoArray)
+                    connect(
+                        _loginParams,
+                        baseContext,
+                        subVerifierInfoArray = subVerifierInfoArray
+                    ) // SFA login
                 }
             }
-            connect(loginParams, ctx) // SFA login
+            connect(loginParams, baseContext) // SFA login
         }
 
         loginCompletableFuture = CompletableFuture()
         return loginCompletableFuture
-
     }
 
     private fun connect(
