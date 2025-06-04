@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 //authConnectionId = "w3ads",
                 //groupedAuthConnectionId = "aggregate-mobile",
                 loginHint = loginHint,
-            ), ctx = this
+            )
         )
         loginCompletableFuture.whenComplete { _, error ->
             if (error == null) {
@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 authConnectionId = TEST_VERIFIER,
                 idToken = idToken,
                 groupedAuthConnectionId = TEST_AGGREGRATE_VERIFIER,
-            ), ctx = this
+            )
         )
         loginCompletableFuture.whenComplete { _, error ->
             if (error == null) {
