@@ -21,7 +21,7 @@ data class Web3AuthOptions(
     @Keep var sessionNamespace: String? = null,
     @Keep var includeUserDataInToken: Boolean? = true,
     @Keep var chains: Chains? = null,
-    @Keep var defaultChainId: String? = null,
+    @Keep var defaultChainId: String? = "0x1",
     @Keep var enableLogging: Boolean = false,
     @Keep val sessionTime: Int = 30 * 86400,
     @SerializedName("network")
