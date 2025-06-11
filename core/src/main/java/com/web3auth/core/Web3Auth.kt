@@ -661,12 +661,12 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     val response = result.body()
                     web3AuthOption.originData =
                         web3AuthOption.originData.mergeMaps(response?.whitelist?.signed_urls)
-                    if (response?.whitelabel != null) {
-                        if (web3AuthOption.walletServicesConfig?.whiteLabel == null) {
-                            web3AuthOption.walletServicesConfig?.whiteLabel = response.whitelabel
-                        } else {
-                            web3AuthOption.walletServicesConfig?.whiteLabel =
-                                web3AuthOption.walletServicesConfig?.whiteLabel!!.merge(response.whitelabel)
+                    response?.whitelabel?.let { whitelabel ->
+                        web3AuthOption.whiteLabel =
+                            web3AuthOption.whiteLabel?.merge(whitelabel) ?: whitelabel
+
+                        web3AuthOption.walletServicesConfig?.apply {
+                            whiteLabel = whiteLabel?.merge(whitelabel) ?: whitelabel
                         }
                     }
                     projectConfigCompletableFuture.complete(true)
