@@ -105,13 +105,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     }
 
     private fun sfaSignIn() {
-        val idToken = JwtUtils.generateIdToken(TORUS_TEST_EMAIL)
+        val idToken = "" //JwtUtils.generateIdToken(TORUS_TEST_EMAIL)
         val web3AuthOptions =
             Web3AuthOptions(
                 clientId = "YOUR_CLIENT_ID",
                 web3AuthNetwork = Web3AuthNetwork.SAPPHIRE_MAINNET,
                 redirectUrl = "torusapp://org.torusresearch.web3authexample",
-                defaultChainId = "0x1",
             )
         web3Auth = Web3Auth(
             web3AuthOptions, this
@@ -241,7 +240,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                                 clientId = "d84f6xvbdV75VTGmHiMWfZLeSPk8M07C"
                             )
                         ),*/
-            authBuildEnv = BuildEnv.TESTING,
+            authBuildEnv = BuildEnv.PRODUCTION,
             defaultChainId = "0x1",
             sessionTime = 86400,
         )
