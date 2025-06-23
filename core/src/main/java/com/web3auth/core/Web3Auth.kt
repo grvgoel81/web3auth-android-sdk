@@ -65,7 +65,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     private val torusUtils: TorusUtils
     private var web3AuthResponse: Web3AuthResponse? = null
     private var web3AuthOption = web3AuthOptions
-    private var loginParams: LoginParams? = null
     private var sessionManager: SessionManager
     private var projectConfigResponse: ProjectConfigResponse? = null
 
@@ -156,14 +155,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 gson.toJson(loginIdObject).toByteArray(Charsets.UTF_8).toBase64URLString()
             )
             paramMap.put("sessionId", SessionManager.getSessionIdFromStorage())
-            if (!this.loginParams?.idToken.isNullOrEmpty()) {
-                paramMap.put("oAuthPrivateKey", web3AuthResponse?.oAuthPrivateKey)
-                paramMap.put("tKey", web3AuthResponse?.tKey)
-                paramMap.put("walletKey", web3AuthResponse?.walletKey)
-                paramMap.put("keyMode", web3AuthResponse?.keyMode)
-                paramMap.put("metadataNonce", web3AuthResponse?.metadataNonce)
-                paramMap.put("authToken", web3AuthResponse?.authToken)
-            }
         }
         paramMap.put("params", initParamsJson)
 
@@ -353,7 +344,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     fun connectTo(
         loginParams: LoginParams
     ): CompletableFuture<Web3AuthResponse> {
-        this.loginParams = loginParams
         if (loginParams.idToken.isNullOrEmpty()) {
             if (!loginParams.loginHint.isNullOrEmpty()) {
                 val updatedExtraLoginOptions = loginParams.extraLoginOptions?.copy(

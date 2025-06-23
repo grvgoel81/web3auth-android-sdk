@@ -22,9 +22,4 @@ data class Web3AuthResponse(
     val tssNonce: Int? = null,
     val nodeIndexes: List<Int>? = null,
     val keyMode: String? = null,
-    val oAuthPrivateKey: String? = null,
-    val tKey: String? = null,
-    val walletKey: String? = null,
-    val metadataNonce: String? = null,
-    val authToken: String? = null,
 )
