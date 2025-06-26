@@ -99,6 +99,10 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     private fun processRequest(
         actionType: String, params: LoginParams?
     ) {
+        if ((actionType == "enable_mfa" || actionType == "manage_mfa") && !params?.idToken.isNullOrEmpty()) {
+            throwEnableMFAError(ErrorCode.ENABLE_MFA_NOT_ALLOWED)
+            return
+        }
         val sdkUrl = Uri.parse(web3AuthOption.sdkUrl)
 
         val initParamsJson = params?.let {
