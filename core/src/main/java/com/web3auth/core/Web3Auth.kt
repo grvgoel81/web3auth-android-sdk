@@ -14,6 +14,7 @@ import com.web3auth.core.api.ApiHelper
 import com.web3auth.core.api.ApiService
 import com.web3auth.core.keystore.KeyStoreManagerUtils
 import com.web3auth.core.types.AuthConnection
+import com.web3auth.core.types.AuthConnectionConfig
 import com.web3auth.core.types.ErrorCode
 import com.web3auth.core.types.ExtraLoginOptions
 import com.web3auth.core.types.LoginParams
@@ -675,6 +676,21 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                             whiteLabel = whiteLabel?.merge(whitelabel) ?: whitelabel
                         }
                     }
+                    val mergedAuthConnections: List<Any?>? =
+                        when {
+                            web3AuthOption.authConnectionConfig != null && projectConfigResponse?.embeddedWalletAuth != null ->
+                                web3AuthOption.authConnectionConfig!! + projectConfigResponse?.embeddedWalletAuth
+
+                            web3AuthOption.authConnectionConfig != null ->
+                                web3AuthOption.authConnectionConfig
+
+                            projectConfigResponse?.embeddedWalletAuth != null ->
+                                projectConfigResponse?.embeddedWalletAuth
+
+                            else -> null
+                        }
+                    web3AuthOption.authConnectionConfig =
+                        mergedAuthConnections as List<AuthConnectionConfig>?
                     projectConfigCompletableFuture.complete(true)
                 } else {
                     projectConfigCompletableFuture.completeExceptionally(
