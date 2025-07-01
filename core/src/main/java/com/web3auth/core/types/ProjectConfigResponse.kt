@@ -63,6 +63,9 @@ data class PaymasterConfig(
 
 @Keep
 enum class SmartAccountType {
+    @SerializedName("metamask")
+    METAMASK,
+
     @SerializedName("biconomy")
     BICONOMY,
 

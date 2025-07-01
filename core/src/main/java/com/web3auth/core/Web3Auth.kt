@@ -14,6 +14,7 @@ import com.web3auth.core.api.ApiHelper
 import com.web3auth.core.api.ApiService
 import com.web3auth.core.keystore.KeyStoreManagerUtils
 import com.web3auth.core.types.AuthConnection
+import com.web3auth.core.types.AuthConnectionConfig
 import com.web3auth.core.types.ErrorCode
 import com.web3auth.core.types.ExtraLoginOptions
 import com.web3auth.core.types.LoginParams
@@ -67,6 +68,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     private var web3AuthOption = web3AuthOptions
     private var sessionManager: SessionManager
     private var projectConfigResponse: ProjectConfigResponse? = null
+    private var loginParams: LoginParams? = null
 
     init {
         val torusOptions = TorusOptions(
@@ -348,6 +350,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     fun connectTo(
         loginParams: LoginParams
     ): CompletableFuture<Web3AuthResponse> {
+        this.loginParams = loginParams
         if (loginParams.idToken.isNullOrEmpty()) {
             if (!loginParams.loginHint.isNullOrEmpty()) {
                 val updatedExtraLoginOptions = loginParams.extraLoginOptions?.copy(
@@ -673,6 +676,21 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                             whiteLabel = whiteLabel?.merge(whitelabel) ?: whitelabel
                         }
                     }
+                    val mergedAuthConnections: List<Any?>? =
+                        when {
+                            web3AuthOption.authConnectionConfig != null && projectConfigResponse?.embeddedWalletAuth != null ->
+                                web3AuthOption.authConnectionConfig!! + projectConfigResponse?.embeddedWalletAuth
+
+                            web3AuthOption.authConnectionConfig != null ->
+                                web3AuthOption.authConnectionConfig
+
+                            projectConfigResponse?.embeddedWalletAuth != null ->
+                                projectConfigResponse?.embeddedWalletAuth
+
+                            else -> null
+                        }
+                    web3AuthOption.authConnectionConfig =
+                        mergedAuthConnections as List<AuthConnectionConfig>?
                     projectConfigCompletableFuture.complete(true)
                 } else {
                     projectConfigCompletableFuture.completeExceptionally(
@@ -759,8 +777,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     )
                     walletMap.addProperty("sessionId", savedSessionId)
                     walletMap.addProperty("platform", "android")
-                    web3AuthOption.sessionNamespace?.let {
-                        walletMap.addProperty("sessionNamespace", it)
+                    this.loginParams?.idToken?.let {
+                        walletMap.addProperty("sessionNamespace", "sfa")
                     }
                     val walletHash =
                         "b64Params=" + gson.toJson(walletMap).toByteArray(Charsets.UTF_8)
@@ -846,10 +864,9 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                         "appState" to gson.toJson(appState)
                     )
 
-                    web3AuthOption.sessionNamespace?.let {
-                        signMessageMap["sessionNamespace"] = it
+                    this.loginParams?.idToken?.let {
+                        signMessageMap["sessionNamespace"] = "sfa"
                     }
-
 
                     val signMessageHash =
                         "b64Params=" + gson.toJson(signMessageMap).toByteArray(Charsets.UTF_8)

@@ -14,7 +14,7 @@ data class Web3AuthOptions(
     @Keep var sdkUrl: String = getSdkUrl(authBuildEnv),
     @Keep var storageServerUrl: String? = null,
     @Keep var sessionSocketUrl: String? = null,
-    @Keep val authConnectionConfig: List<AuthConnectionConfig>? = emptyList(),
+    @Keep var authConnectionConfig: List<AuthConnectionConfig>? = emptyList(),
     @Keep var whiteLabel: WhiteLabelData? = null,
     @Keep var dashboardUrl: String? = getDashboardUrl(authBuildEnv),
     @Keep var accountAbstractionConfig: String? = null,
