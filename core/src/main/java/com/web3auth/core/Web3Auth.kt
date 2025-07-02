@@ -12,7 +12,9 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.web3auth.core.api.ApiHelper
 import com.web3auth.core.api.ApiService
+import com.web3auth.core.keystore.IS_SFA
 import com.web3auth.core.keystore.KeyStoreManagerUtils
+import com.web3auth.core.keystore.SharedPrefsHelper
 import com.web3auth.core.types.AuthConnection
 import com.web3auth.core.types.ErrorCode
 import com.web3auth.core.types.ExtraLoginOptions
@@ -76,6 +78,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         )
         //network = web3AuthOptions.web3AuthNetwork
         torusUtils = TorusUtils(torusOptions)
+        SharedPrefsHelper.init(context.applicationContext)
         sessionManager = SessionManager(
             context,
             web3AuthOptions.sessionTime,
@@ -363,6 +366,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 login(it) // PnP login
             }
         } else {
+            SharedPrefsHelper.putBoolean(IS_SFA, true)
             loginParams.groupedAuthConnectionId?.let {
                 if (it.isNullOrEmpty()) {
                     connect(loginParams, baseContext)
@@ -559,6 +563,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 }
             }
         }
+        SharedPrefsHelper.clear()
         web3AuthResponse = Web3AuthResponse()
         return logoutCompletableFuture
     }
@@ -745,7 +750,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     put("embeddedWalletAuth", JSONArray(gson.toJson(it)))
                 }
                 projectConfigResponse?.smartAccounts?.let {
-                    put("smartAccounts", JSONObject(gson.toJson(it)))
+                    put("accountAbstractionConfig", JSONObject(gson.toJson(it)))
                 }
             }
 
@@ -764,9 +769,11 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     )
                     walletMap.addProperty("sessionId", savedSessionId)
                     walletMap.addProperty("platform", "android")
-                    this.loginParams?.idToken?.let {
+                    val isSFAValue = SharedPrefsHelper.getBoolean(IS_SFA)
+                    if (isSFAValue) {
                         walletMap.addProperty("sessionNamespace", "sfa")
                     }
+
                     val walletHash =
                         "b64Params=" + gson.toJson(walletMap).toByteArray(Charsets.UTF_8)
                             .toBase64URLString()
@@ -826,7 +833,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     initOptions.put("embeddedWalletAuth", JSONArray(gson.toJson(it)))
                 }
                 projectConfigResponse?.smartAccounts?.let {
-                    put("smartAccounts", JSONObject(gson.toJson(it)))
+                    put("accountAbstractionConfig", JSONObject(gson.toJson(it)))
                 }
             }
 
@@ -851,7 +858,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                         "appState" to gson.toJson(appState)
                     )
 
-                    this.loginParams?.idToken?.let {
+                    val isSFAValue = SharedPrefsHelper.getBoolean(IS_SFA)
+                    if (isSFAValue) {
                         signMessageMap["sessionNamespace"] = "sfa"
                     }
 
