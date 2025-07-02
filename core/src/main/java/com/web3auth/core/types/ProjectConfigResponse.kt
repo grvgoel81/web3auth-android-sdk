@@ -30,9 +30,6 @@ data class SmartAccountsConfig(
     @SerializedName("smartAccountType")
     val smartAccountType: SmartAccountType,
 
-    @SerializedName("walletScope")
-    val walletScope: SmartAccountWalletScope,
-
     @SerializedName("chains")
     val chains: List<ChainConfig>
 )
