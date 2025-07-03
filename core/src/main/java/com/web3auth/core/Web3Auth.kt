@@ -82,8 +82,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         sessionManager = SessionManager(
             context,
             web3AuthOptions.sessionTime,
-            web3AuthOptions.redirectUrl,
-            sessionNamespace = if (web3AuthOptions.sessionNamespace?.isNotEmpty() == true) web3AuthOptions.sessionNamespace else ""
+            web3AuthOptions.redirectUrl
         )
     }
 
@@ -769,10 +768,10 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     )
                     walletMap.addProperty("sessionId", savedSessionId)
                     walletMap.addProperty("platform", "android")
-                    val isSFAValue = SharedPrefsHelper.getBoolean(IS_SFA)
+                    /*val isSFAValue = SharedPrefsHelper.getBoolean(IS_SFA)
                     if (isSFAValue) {
                         walletMap.addProperty("sessionNamespace", "sfa")
-                    }
+                    }*/
 
                     val walletHash =
                         "b64Params=" + gson.toJson(walletMap).toByteArray(Charsets.UTF_8)
@@ -858,10 +857,10 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                         "appState" to gson.toJson(appState)
                     )
 
-                    val isSFAValue = SharedPrefsHelper.getBoolean(IS_SFA)
+                    /*val isSFAValue = SharedPrefsHelper.getBoolean(IS_SFA)
                     if (isSFAValue) {
                         signMessageMap["sessionNamespace"] = "sfa"
-                    }
+                    }*/
 
                     val signMessageHash =
                         "b64Params=" + gson.toJson(signMessageMap).toByteArray(Charsets.UTF_8)
