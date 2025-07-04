@@ -82,7 +82,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         sessionManager = SessionManager(
             context,
             web3AuthOptions.sessionTime,
-            web3AuthOptions.redirectUrl
+            web3AuthOptions.redirectUrl,
+            sessionNamespace = if (web3AuthOptions.sessionNamespace?.isNotEmpty() == true) web3AuthOptions.sessionNamespace else ""
         )
     }
 
@@ -679,9 +680,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                             whiteLabel = whiteLabel?.merge(whitelabel) ?: whitelabel
                         }
                     }
-                    web3AuthOption.authConnectionConfig =
-                        (web3AuthOption.authConnectionConfig.orEmpty() +
-                                projectConfigResponse?.embeddedWalletAuth.orEmpty())
+                    //web3AuthOption.authConnectionConfig =
+                    //    (web3AuthOption.authConnectionConfig.orEmpty() + projectConfigResponse?.embeddedWalletAuth.orEmpty())
                     projectConfigCompletableFuture.complete(true)
                 } else {
                     projectConfigCompletableFuture.completeExceptionally(
