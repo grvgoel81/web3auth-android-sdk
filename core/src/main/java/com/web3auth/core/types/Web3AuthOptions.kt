@@ -19,7 +19,6 @@ data class Web3AuthOptions(
     @Keep var dashboardUrl: String? = getDashboardUrl(authBuildEnv),
     @Keep var accountAbstractionConfig: String? = null,
     @Keep var walletSdkUrl: String? = getWalletSdkUrl(authBuildEnv),
-    @Keep var sessionNamespace: String? = null,
     @Keep var includeUserDataInToken: Boolean? = true,
     @Keep var chains: Chains? = null,
     @Keep var defaultChainId: String? = "0x1",
