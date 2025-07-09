@@ -79,11 +79,12 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         //network = web3AuthOptions.web3AuthNetwork
         torusUtils = TorusUtils(torusOptions)
         SharedPrefsHelper.init(context.applicationContext)
+        val isSFAValue = SharedPrefsHelper.getBoolean(IS_SFA)
         sessionManager = SessionManager(
             context,
             web3AuthOptions.sessionTime,
             web3AuthOptions.redirectUrl,
-            sessionNamespace = if (web3AuthOptions.sessionNamespace?.isNotEmpty() == true) web3AuthOptions.sessionNamespace else ""
+            sessionNamespace = if (isSFAValue) "sfa" else ""
         )
     }
 
