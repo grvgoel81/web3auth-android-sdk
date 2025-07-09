@@ -353,6 +353,12 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         loginParams: LoginParams
     ): CompletableFuture<Web3AuthResponse> {
         this.loginParams = loginParams
+        sessionManager = SessionManager(
+            baseContext,
+            web3AuthOption.sessionTime,
+            web3AuthOption.redirectUrl,
+            sessionNamespace = if (!loginParams.idToken.isNullOrEmpty()) "sfa" else ""
+        )
         if (loginParams.idToken.isNullOrEmpty()) {
             if (!loginParams.loginHint.isNullOrEmpty()) {
                 val updatedExtraLoginOptions = loginParams.extraLoginOptions?.copy(
@@ -680,8 +686,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                             whiteLabel = whiteLabel?.merge(whitelabel) ?: whitelabel
                         }
                     }
-                    //web3AuthOption.authConnectionConfig =
-                    //    (web3AuthOption.authConnectionConfig.orEmpty() + projectConfigResponse?.embeddedWalletAuth.orEmpty())
+                    web3AuthOption.authConnectionConfig =
+                        (web3AuthOption.authConnectionConfig.orEmpty() + projectConfigResponse?.embeddedWalletAuth.orEmpty())
                     projectConfigCompletableFuture.complete(true)
                 } else {
                     projectConfigCompletableFuture.completeExceptionally(
