@@ -680,8 +680,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                             whiteLabel = whiteLabel?.merge(whitelabel) ?: whitelabel
                         }
                     }
-                    //web3AuthOption.authConnectionConfig =
-                    //    (web3AuthOption.authConnectionConfig.orEmpty() + projectConfigResponse?.embeddedWalletAuth.orEmpty())
+                    web3AuthOption.authConnectionConfig =
+                        (web3AuthOption.authConnectionConfig.orEmpty() + projectConfigResponse?.embeddedWalletAuth.orEmpty())
                     projectConfigCompletableFuture.complete(true)
                 } else {
                     projectConfigCompletableFuture.completeExceptionally(
