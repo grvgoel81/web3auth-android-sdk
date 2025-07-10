@@ -754,8 +754,11 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                         "defaultChainId",
                         it.firstOrNull()?.chainId ?: web3AuthOption.defaultChainId ?: "0x1"
                     )
+                    put(
+                        "chainId",
+                        it.firstOrNull()?.chainId ?: web3AuthOption.defaultChainId ?: "0x1"
+                    )
                 }
-                put("chainId", web3AuthOption.defaultChainId ?: "0x1")
                 projectConfigResponse?.embeddedWalletAuth?.let {
                     put("embeddedWalletAuth", JSONArray(gson.toJson(it)))
                 }
@@ -839,10 +842,13 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     put("chains", gson.toJson(it))
                     put(
                         "defaultChainId",
-                        web3AuthOption.defaultChainId ?: it.firstOrNull()?.chainId ?: "0x1"
+                        it.firstOrNull()?.chainId ?: web3AuthOption.defaultChainId ?: "0x1"
+                    )
+                    put(
+                        "chainId",
+                        it.firstOrNull()?.chainId ?: web3AuthOption.defaultChainId ?: "0x1"
                     )
                 }
-                put("chainId", web3AuthOption.defaultChainId ?: "0x1")
                 projectConfigResponse?.embeddedWalletAuth?.let {
                     initOptions.put("embeddedWalletAuth", JSONArray(gson.toJson(it)))
                 }
