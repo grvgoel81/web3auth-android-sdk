@@ -232,7 +232,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                     )
                 )
             ),
-            authConnectionConfig = authConfig,
+            //authConnectionConfig = authConfig,
             /*listOf(
                             AuthConnectionConfig(
                                 authConnectionId = "web3auth-auth0-email-passwordless-sapphire-devnet",
@@ -240,7 +240,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                                 clientId = "d84f6xvbdV75VTGmHiMWfZLeSPk8M07C"
                             )
                         ),*/
-            authBuildEnv = BuildEnv.PRODUCTION,
+            authBuildEnv = BuildEnv.TESTING,
             defaultChainId = "0x1",
             sessionTime = 86400,
         )
