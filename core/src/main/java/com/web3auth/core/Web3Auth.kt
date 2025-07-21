@@ -148,6 +148,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             val userInfo = web3AuthResponse?.userInfo
             initParamsJson.put("authConnection", userInfo?.authConnection)
             initParamsJson.put("authConnectionId", userInfo?.authConnectionId)
+            initParamsJson.put("groupedAuthConnectionId", userInfo?.groupedAuthConnectionId)
             val extraOptionsString: String
             var existingExtraLoginOptions = ExtraLoginOptions()
             if (initParamsJson.has("extraLoginOptions")) {
