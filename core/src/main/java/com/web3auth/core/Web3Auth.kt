@@ -76,7 +76,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             web3AuthOptions.clientId, web3AuthOptions.web3AuthNetwork, null,
             0, true
         )
-        //network = web3AuthOptions.web3AuthNetwork
         torusUtils = TorusUtils(torusOptions)
         SharedPrefsHelper.init(context.applicationContext)
         val isSFAValue = SharedPrefsHelper.getBoolean(IS_SFA)
@@ -149,6 +148,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             val userInfo = web3AuthResponse?.userInfo
             initParamsJson.put("authConnection", userInfo?.authConnection)
             initParamsJson.put("authConnectionId", userInfo?.authConnectionId)
+            initParamsJson.put("groupedAuthConnectionId", userInfo?.groupedAuthConnectionId)
             val extraOptionsString: String
             var existingExtraLoginOptions = ExtraLoginOptions()
             if (initParamsJson.has("extraLoginOptions")) {
@@ -519,7 +519,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         val isUpgraded = retrieveSharesResponse.metadata?.isUpgraded
 
         if (isUpgraded == true) {
-            //throw Exception(Web3AuthError.getError(ErrorCode.USER_ALREADY_ENABLED_MFA))
+            throw Exception(Web3AuthError.getError(ErrorCode.USER_ALREADY_ENABLED_MFA))
         }
 
         return retrieveSharesResponse
