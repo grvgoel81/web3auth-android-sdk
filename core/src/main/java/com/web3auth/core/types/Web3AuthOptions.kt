@@ -90,7 +90,7 @@ fun getDashboardUrl(buildEnv: BuildEnv?): String {
 
 const val authServiceVersion = "v10"
 const val walletServicesVersion = "v5"
-const val authDashboardVersion = "v9"
+const val authDashboardVersion = "v10"
 const val walletAccountConstant = "wallet/account"
 const val WEBVIEW_URL = "walletUrl"
 const val REDIRECT_URL = "redirectUrl"
