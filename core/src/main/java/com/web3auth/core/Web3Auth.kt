@@ -10,6 +10,7 @@ import com.auth0.android.jwt.JWT
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import com.web3auth.core.analytics.AnalyticsManager
 import com.web3auth.core.api.ApiHelper
 import com.web3auth.core.api.ApiService
 import com.web3auth.core.keystore.IS_SFA
@@ -79,12 +80,23 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         torusUtils = TorusUtils(torusOptions)
         SharedPrefsHelper.init(context.applicationContext)
         val isSFAValue = SharedPrefsHelper.getBoolean(IS_SFA)
+
+        //Session Manager initialization
         sessionManager = SessionManager(
             context,
             web3AuthOptions.sessionTime,
             web3AuthOptions.redirectUrl,
             sessionNamespace = if (isSFAValue) "sfa" else ""
         )
+
+        //Segment Analytics initialization
+        AnalyticsManager.initialize(context.applicationContext)
+        /*AnalyticsManager.trackEvent(
+            "Web3AuthEvents", mapOf(
+                "clientId" to web3AuthOptions.clientId,
+                "isSFA" to isSFAValue
+            )
+        )*/
     }
 
     /**
