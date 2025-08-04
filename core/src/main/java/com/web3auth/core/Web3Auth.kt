@@ -484,6 +484,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             AnalyticsManager.trackEvent(
                 AnalyticsEvents.CONNECTION_STARTED,
                 mutableMapOf<String, Any>(
+                    "chain_id" to web3AuthOption.defaultChainId.toString(),
+                    "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
                     "is_sfa" to true,
                 )
             )
