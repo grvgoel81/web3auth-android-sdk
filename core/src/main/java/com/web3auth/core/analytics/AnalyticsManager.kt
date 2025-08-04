@@ -33,6 +33,7 @@ internal object AnalyticsManager {
 
     fun trackEvent(eventName: String, properties: Map<String, Any?>? = null) {
         if (!isInitialized) return
+        if (isSkipped()) return
 
         val combinedProps = Properties().apply {
             globalProperties.forEach { (k, v) -> putValue(k, v) }

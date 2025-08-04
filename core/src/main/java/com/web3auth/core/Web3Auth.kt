@@ -263,6 +263,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     AnalyticsEvents.SDK_INITIALIZATION_FAILED,
                     mutableMapOf<String, Any>(
                         "duration" to System.currentTimeMillis() - startTime,
+                        "error" to "Fetch project config API error. ${err.message}"
                     )
                 )
                 initializeCf.completeExceptionally(err)
@@ -299,6 +300,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     AnalyticsEvents.MFA_ENABLEMENT_FAILED,
                     mutableMapOf<String, Any>(
                         "duration" to System.currentTimeMillis() - startTime,
+                        "error_message" to "MFA Enablement Failed: $error"
                     )
                 )
             }
@@ -311,6 +313,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     AnalyticsEvents.MFA_MANAGEMENT_FAILED,
                     mutableMapOf<String, Any>(
                         "duration" to System.currentTimeMillis() - startTime,
+                        "error_message" to "MFA Management Failed: $error"
                     )
                 )
             }
@@ -443,6 +446,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 "auth_connection" to loginParams.authConnection,
                 "auth_connection_id" to loginParams.authConnectionId,
                 "group_auth_connection_id" to loginParams.groupedAuthConnectionId,
+                "chain_id" to web3AuthOption.defaultChainId.toString(),
+                "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
                 "dappUrl" to loginParams.dappUrl,
             )
         )
@@ -458,6 +463,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             AnalyticsManager.trackEvent(
                 AnalyticsEvents.CONNECTION_STARTED,
                 mutableMapOf<String, Any>(
+                    "chain_id" to web3AuthOption.defaultChainId.toString(),
+                    "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
                     "is_sfa" to false,
                 )
             )
@@ -680,7 +687,10 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     logoutCompletableFuture.complete(null)
                 } else {
                     AnalyticsManager.trackEvent(
-                        AnalyticsEvents.LOGOUT_FAILED
+                        AnalyticsEvents.LOGOUT_FAILED,
+                        mutableMapOf<String, Any>(
+                            "error_message" to "Logout Failed: ${error.message}"
+                        )
                     )
                     logoutCompletableFuture.completeExceptionally(Exception(error))
                 }
@@ -946,6 +956,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 AnalyticsEvents.WALLET_SERVICES_FAILED,
                 mutableMapOf<String, Any>(
                     "duration" to System.currentTimeMillis() - startTime,
+                    "error" to "Wallet Services Error: Session ID is not found. Please login first."
                 )
             )
             launchWalletServiceCF.completeExceptionally(Exception("Please login first to launch wallet"))
@@ -1052,6 +1063,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     AnalyticsEvents.REQUEST_FUNCTION_FAILED,
                     mutableMapOf<String, Any>(
                         "duration" to System.currentTimeMillis() - startTime,
+                        "error" to "Request Function Error: Session ID is not found. Please login first."
                     )
                 )
                 signMsgCF.completeExceptionally(Exception("Please login first to launch wallet"))
@@ -1173,7 +1185,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
 
         val properties = mapOf(
             "duration" to System.currentTimeMillis() - startTime,
-            "error" to (error?.name ?: "Unknown Error")
+            "error_message" to (error?.name ?: "Unknown Error")
         )
 
         AnalyticsManager.trackEvent(event, properties)
