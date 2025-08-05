@@ -925,7 +925,11 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         path: String? = "wallet",
     ): CompletableFuture<Void> {
         AnalyticsManager.trackEvent(
-            AnalyticsEvents.WALLET_UI_CLICKED
+            AnalyticsEvents.WALLET_UI_CLICKED,
+            mutableMapOf<String, Any>(
+                "integration_type" to "android",
+                "dapp_url" to this.loginParams?.dappUrl.toString(),
+            )
         )
         val launchWalletServiceCF: CompletableFuture<Void> = CompletableFuture()
         val savedSessionId = SessionManager.getSessionIdFromStorage()
@@ -997,6 +1001,8 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             AnalyticsManager.trackEvent(
                 AnalyticsEvents.WALLET_SERVICES_FAILED,
                 mutableMapOf<String, Any>(
+                    "integration_type" to "android",
+                    "dapp_url" to this.loginParams?.dappUrl.toString(),
                     "duration" to System.currentTimeMillis() - startTime,
                     "error" to "Wallet Services Error: Session ID is not found. Please login first."
                 )
