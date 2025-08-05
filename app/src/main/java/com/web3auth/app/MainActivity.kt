@@ -353,7 +353,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     override fun onResume() {
         super.onResume()
         if (Web3Auth.getCustomTabsClosed()) {
-            Toast.makeText(this, "User closed the browser.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "User closes the browser.", Toast.LENGTH_SHORT).show()
             web3Auth.setResultUrl(null)
             Web3Auth.setCustomTabsClosed(false)
         }
