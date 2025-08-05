@@ -1,7 +1,6 @@
 package com.web3auth.core.analytics
 
 object AnalyticsEvents {
-    const val SDK_INITIALIZATION_STARTED = "SDK Initialization Started"
     const val SDK_INITIALIZATION_COMPLETED = "SDK Initialization Completed"
     const val SDK_INITIALIZATION_FAILED = "SDK Initialization Failed"
     const val CONNECTION_STARTED = "Connection Started"
@@ -13,8 +12,7 @@ object AnalyticsEvents {
     const val MFA_MANAGEMENT_SELECTED = "MFA Management Selected"
     const val MFA_MANAGEMENT_FAILED = "MFA Management Failed"
     const val MFA_MANAGEMENT_COMPLETED = "MFA Management Completed"
-    const val SOCIAL_LOGIN_SELECTED = "Social Login Selected"
-    const val WALLET_SERVICES_STARTED = "Wallet Services Started"
+    const val WALLET_UI_CLICKED = "Wallet UI Clicked"
     const val WALLET_SERVICES_FAILED = "Wallet Services Failed"
     const val LOGOUT_STARTED = "Logout Started"
     const val LOGOUT_COMPLETED = "Logout Completed"

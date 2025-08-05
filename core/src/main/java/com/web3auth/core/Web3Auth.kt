@@ -93,12 +93,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 "web3auth_network" to web3AuthOptions.web3AuthNetwork,
             )
         )
-        AnalyticsManager.trackEvent(
-            AnalyticsEvents.SDK_INITIALIZATION_STARTED,
-            mutableMapOf<String, Any>(
-                "duration" to System.currentTimeMillis() - startTime,
-            )
-        )
 
         val torusOptions = TorusOptions(
             web3AuthOptions.clientId, web3AuthOptions.web3AuthNetwork, null,
@@ -237,11 +231,44 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         //fetch project config
         fetchProjectConfig().whenComplete { _, err ->
             if (err == null) {
+                val properties = mutableMapOf(
+                    "chain_ids" to listOf("eip155", "solana", "other"),
+                    "logging_enabled" to web3AuthOption.enableLogging,
+                    "auth_build_env" to web3AuthOption.authBuildEnv,
+                    "auth_ux_mode" to "popup",
+                    "auth_mfa_settings" to emptyList<String>(),
+                    "whitelabel_logo_light_enabled" to (web3AuthOption.whiteLabel?.logoLight != null),
+                    "whitelabel_logo_dark_enabled" to (web3AuthOption.whiteLabel?.logoDark != null),
+                    "whitelabel_theme_mode" to (web3AuthOption.whiteLabel?.theme),
+                    "modal_auth_connector_login_methods" to listOf(
+                        "email_passwordless",
+                        "sms_passwordless"
+                    ),
+                    "ui_login_methods_order" to listOf(
+                        "google",
+                        "twitter",
+                        "facebook",
+                        "discord",
+                        "farcaster",
+                        "apple",
+                        "github",
+                        "reddit",
+                        "line",
+                        "kakao",
+                        "linkedin",
+                        "twitch",
+                        "wechat",
+                        "email_passwordless",
+                        "sms_passwordless"
+                    ),
+                    "duration" to System.currentTimeMillis() - startTime,
+                    "integration_type" to "android",
+                    "dapp_url" to this.loginParams?.dappUrl,
+                )
+
                 AnalyticsManager.trackEvent(
                     AnalyticsEvents.SDK_INITIALIZATION_COMPLETED,
-                    mutableMapOf<String, Any>(
-                        "duration" to System.currentTimeMillis() - startTime,
-                    )
+                    properties
                 )
                 //authorize session
                 sessionManager.setSessionId(SessionManager.getSessionIdFromStorage())
@@ -262,8 +289,10 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 AnalyticsManager.trackEvent(
                     AnalyticsEvents.SDK_INITIALIZATION_FAILED,
                     mutableMapOf<String, Any>(
+                        "integration_type" to "android",
+                        "dapp_url" to "this.loginParams?.dappUrl.toString()",
                         "duration" to System.currentTimeMillis() - startTime,
-                        "error" to "Fetch project config API error. ${err.message}"
+                        "error_message" to "Fetch project config API error. ${err.message}"
                     )
                 )
                 initializeCf.completeExceptionally(err)
@@ -312,6 +341,9 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 AnalyticsManager.trackEvent(
                     AnalyticsEvents.MFA_MANAGEMENT_FAILED,
                     mutableMapOf<String, Any>(
+                        "integration_type" to "android",
+                        "dapp_url" to this.loginParams?.dappUrl.toString(),
+                        "connector" to "auth",
                         "duration" to System.currentTimeMillis() - startTime,
                         "error_message" to "MFA Management Failed: $error"
                     )
@@ -440,18 +472,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     ): CompletableFuture<Web3AuthResponse> {
         actionType = "login"
 
-        AnalyticsManager.trackEvent(
-            AnalyticsEvents.SOCIAL_LOGIN_SELECTED,
-            mapOf(
-                "auth_connection" to loginParams.authConnection,
-                "auth_connection_id" to loginParams.authConnectionId,
-                "group_auth_connection_id" to loginParams.groupedAuthConnectionId,
-                "chain_id" to web3AuthOption.defaultChainId.toString(),
-                "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
-                "dappUrl" to loginParams.dappUrl,
-            )
-        )
-
         this.loginParams = loginParams
         sessionManager = SessionManager(
             baseContext,
@@ -459,12 +479,23 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             web3AuthOption.redirectUrl,
             sessionNamespace = if (!loginParams.idToken.isNullOrEmpty()) "sfa" else ""
         )
+
+        val analyticsProps = mutableMapOf<String, Any>(
+            "connector" to "auth",
+            "auth_connection" to loginParams.authConnection,
+            "auth_connection_id" to loginParams.authConnectionId.toString(),
+            "group_auth_connection_id" to loginParams.groupedAuthConnectionId.toString(),
+            "chain_id" to web3AuthOption.defaultChainId.toString(),
+            "dapp_url" to loginParams.dappUrl.toString(),
+            "chain_id" to web3AuthOption.defaultChainId.toString(),
+            "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
+            "auth_ux_mode" to "popup",
+        )
+
         if (loginParams.idToken.isNullOrEmpty()) {
             AnalyticsManager.trackEvent(
                 AnalyticsEvents.CONNECTION_STARTED,
-                mutableMapOf<String, Any>(
-                    "chain_id" to web3AuthOption.defaultChainId.toString(),
-                    "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
+                analyticsProps + mutableMapOf<String, Any>(
                     "is_sfa" to false,
                 )
             )
@@ -483,9 +514,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             SharedPrefsHelper.putBoolean(IS_SFA, true)
             AnalyticsManager.trackEvent(
                 AnalyticsEvents.CONNECTION_STARTED,
-                mutableMapOf<String, Any>(
-                    "chain_id" to web3AuthOption.defaultChainId.toString(),
-                    "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
+                analyticsProps + mutableMapOf<String, Any>(
                     "is_sfa" to true,
                 )
             )
@@ -713,7 +742,13 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     fun enableMFA(loginParams: LoginParams? = null): CompletableFuture<Boolean> {
         actionType = "enable_mfa"
         AnalyticsManager.trackEvent(
-            AnalyticsEvents.MFA_ENABLEMENT_STARTED
+            AnalyticsEvents.MFA_ENABLEMENT_STARTED,
+            mutableMapOf<String, Any>(
+                "integration_type" to "android",
+                "dapp_url" to this.loginParams?.dappUrl.toString(),
+                "connector" to "auth",
+                "duration" to System.currentTimeMillis() - startTime,
+            )
         )
         enableMfaCompletableFuture = CompletableFuture()
         if (web3AuthResponse?.userInfo?.isMfaEnabled == true) {
@@ -733,7 +768,12 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     fun manageMFA(loginParams: LoginParams? = null): CompletableFuture<Boolean> {
         actionType = "manage_mfa"
         AnalyticsManager.trackEvent(
-            AnalyticsEvents.MFA_MANAGEMENT_SELECTED
+            AnalyticsEvents.MFA_MANAGEMENT_SELECTED,
+            mutableMapOf<String, Any>(
+                "integration_type" to "android",
+                "dapp_url" to this.loginParams?.dappUrl.toString(),
+                "connector" to "auth"
+            )
         )
         manageMfaCompletableFuture = CompletableFuture()
         if (web3AuthResponse?.userInfo?.isMfaEnabled == false) {
@@ -885,7 +925,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         path: String? = "wallet",
     ): CompletableFuture<Void> {
         AnalyticsManager.trackEvent(
-            AnalyticsEvents.WALLET_SERVICES_STARTED
+            AnalyticsEvents.WALLET_UI_CLICKED
         )
         val launchWalletServiceCF: CompletableFuture<Void> = CompletableFuture()
         val savedSessionId = SessionManager.getSessionIdFromStorage()
@@ -1186,6 +1226,15 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         }
 
         val properties = mapOf(
+            "connector" to "auth",
+            "auth_connection" to loginParams?.authConnection,
+            "auth_connection_id" to loginParams?.authConnectionId.toString(),
+            "group_auth_connection_id" to loginParams?.groupedAuthConnectionId.toString(),
+            "chain_id" to web3AuthOption.defaultChainId.toString(),
+            "dapp_url" to loginParams?.dappUrl.toString(),
+            "chain_id" to web3AuthOption.defaultChainId.toString(),
+            "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
+            "auth_ux_mode" to "popup",
             "duration" to System.currentTimeMillis() - startTime,
             "error_message" to (error?.name ?: "Unknown Error")
         )
@@ -1200,7 +1249,20 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             else -> AnalyticsEvents.MFA_MANAGEMENT_COMPLETED
         }
 
-        val properties = mapOf("duration" to System.currentTimeMillis() - startTime)
+        val analyticsProps = mutableMapOf<String, Any>(
+            "connector" to "auth",
+            "auth_connection" to loginParams?.authConnection.toString(),
+            "auth_connection_id" to loginParams?.authConnectionId.toString(),
+            "group_auth_connection_id" to loginParams?.groupedAuthConnectionId.toString(),
+            "chain_id" to web3AuthOption.defaultChainId.toString(),
+            "dapp_url" to loginParams?.dappUrl.toString(),
+            "chain_id" to web3AuthOption.defaultChainId.toString(),
+            "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
+            "integration_type" to "android",
+            "is_mfa_enabled" to (actionType == "enable_mfa"),
+        )
+        val properties =
+            analyticsProps + mapOf("duration" to System.currentTimeMillis() - startTime)
 
         AnalyticsManager.trackEvent(event, properties)
     }
