@@ -4,12 +4,16 @@ import android.content.Context
 import com.segment.analytics.Analytics
 import com.segment.analytics.Properties
 import com.segment.analytics.Traits
+import com.web3auth.core.BuildConfig
 
 internal object AnalyticsManager {
 
-    private const val SEGMENT_WRITE_KEY = "YOUR_SECRET_WRITE_KEY"
+    private const val SEGMENT_WRITE_KEY =
+        SegmentKeys.SEGMENT_WRITE_KEY // Use (SEGMENT_WRITE_KEY) in production builds and (SEGMENT_WRITE_KEY_DEV) in development/testing builds
     private var analytics: Analytics? = null
     private var isInitialized = false
+
+    private val globalProperties: MutableMap<String, Any> = mutableMapOf()
 
     fun initialize(context: Context) {
         if (isInitialized) return
@@ -23,20 +27,25 @@ internal object AnalyticsManager {
         isInitialized = true
     }
 
-    fun trackEvent(eventName: String, properties: Map<String, Any>? = null) {
-        if (!isInitialized) return
-
-        val props = properties?.let {
-            Properties().apply {
-                it.forEach { (k, v) -> putValue(k, v) }
-            }
-        }
-
-        analytics?.track(eventName, props)
+    fun setGlobalProperties(properties: Map<String, Any>) {
+        globalProperties.putAll(properties)
     }
 
-    fun identifyUser(userId: String, traits: Map<String, Any>? = null) {
+    fun trackEvent(eventName: String, properties: Map<String, Any?>? = null) {
         if (!isInitialized) return
+        if (isSkipped()) return
+
+        val combinedProps = Properties().apply {
+            globalProperties.forEach { (k, v) -> putValue(k, v) }
+            properties?.forEach { (k, v) -> putValue(k, v) }
+        }
+
+        analytics?.track(eventName, combinedProps)
+    }
+
+    fun identify(userId: String, traits: Map<String, Any>? = null) {
+        if (!isInitialized) return
+        if (isSkipped()) return
 
         val traitsObj = traits?.let {
             Traits().apply {
@@ -50,5 +59,11 @@ internal object AnalyticsManager {
     fun reset() {
         analytics?.reset()
         isInitialized = false
+        globalProperties.clear()
+    }
+
+    private fun isSkipped(): Boolean {
+        return BuildConfig.DEBUG
     }
 }
+
