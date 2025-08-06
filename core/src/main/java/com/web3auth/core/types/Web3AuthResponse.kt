@@ -1,10 +1,12 @@
 package com.web3auth.core.types
 
 import androidx.annotation.Keep
+import com.google.gson.annotations.SerializedName
 
 @Keep
 data class Web3AuthResponse(
-    val privKey: String? = null,
+    @SerializedName("privKey")
+    val privateKey: String? = null,
     val ed25519PrivKey: String? = null,
     val userInfo: UserInfo? = null,
     val error: String? = null,
@@ -16,6 +18,7 @@ data class Web3AuthResponse(
     val tssShareIndex: Int? = null,
     val tssPubKey: String? = null,
     val tssShare: String? = null,
+    val tssTag: String? = null,
     val tssNonce: Int? = null,
     val nodeIndexes: List<Int>? = null,
     val keyMode: String? = null,

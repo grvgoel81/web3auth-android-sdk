@@ -4,7 +4,9 @@ import androidx.annotation.Keep
 
 @Keep
 data class InitParams(
-    @Keep val loginProvider: String? = null,
+    @Keep val authConnection: String? = null,
+    @Keep val authConnectionId: String? = null,
+    @Keep val groupedAuthConnectionId: String? = null,
     @Keep val extraLoginOptions: String? = null,
     @Keep val redirectUrl: String,
     @Keep val mfaLevel: String? = null,

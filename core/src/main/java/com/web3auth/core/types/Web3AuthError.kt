@@ -46,6 +46,18 @@ object Web3AuthError {
             ErrorCode.USER_CANCELLED -> {
                 "User Cancelled"
             }
+
+            ErrorCode.USER_ALREADY_ENABLED_MFA -> {
+                "User has already enabled MFA"
+            }
+
+            ErrorCode.PROJECT_CONFIG_NOT_FOUND_ERROR -> {
+                "Project configuration not found. Please check your project settings."
+            }
+
+            ErrorCode.ENABLE_MFA_NOT_ALLOWED -> {
+                "Enabling MFA is not allowed for this user."
+            }
         }
     }
 }
@@ -61,5 +73,8 @@ enum class ErrorCode {
     INVALID_LOGIN,
     MFA_ALREADY_ENABLED,
     MFA_NOT_ENABLED,
-    USER_CANCELLED
+    USER_CANCELLED,
+    USER_ALREADY_ENABLED_MFA,
+    PROJECT_CONFIG_NOT_FOUND_ERROR,
+    ENABLE_MFA_NOT_ALLOWED
 }

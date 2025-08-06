@@ -17,10 +17,16 @@ android {
     }
 
     buildTypes {
+        debug {
+            minifyEnabled false
+            debuggable true
+        }
         release {
-            minifyEnabled true
+            minifyEnabled false
+            shrinkResources false
+            debuggable true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            consumerProguardFiles 'proguard-rules.pro', 'gson.pro', 'retrofit2.pro'
+            consumerProguardFiles 'proguard-rules.pro', 'gson.pro', 'retrofit2.pro', 'consumer-rules.pro'
         }
     }
     compileOptions {
@@ -74,17 +80,32 @@ dependencies {
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01"
 
+    //analytics library
+    implementation "com.segment.analytics.android:analytics:4.11.3"
+
+    api 'org.torusresearch:torus-utils-java:4.0.3'
+    api 'org.torusresearch:fetch-node-details-java:5.0.0'
+    implementation 'com.auth0.android:jwtdecode:2.0.2'
+
     // Test
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
 
-project.afterEvaluate {
+afterEvaluate {
+    // 1. Define the sources JAR task
+    task androidSourcesJar(type: Jar) {
+        archiveClassifier.set("sources")
+        from android.sourceSets.main.java.srcDirs
+    }
+
+    // 2. Add sources JAR to the publishing
     publishing {
         publications {
             release(MavenPublication) {
                 from components.release
+                artifact androidSourcesJar
             }
         }
     }

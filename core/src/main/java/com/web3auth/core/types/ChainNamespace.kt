@@ -9,5 +9,8 @@ enum class ChainNamespace {
     EIP155,
 
     @SerializedName("solana")
-    SOLANA
+    SOLANA,
+
+    @SerializedName("other")
+    OTHER
 }
