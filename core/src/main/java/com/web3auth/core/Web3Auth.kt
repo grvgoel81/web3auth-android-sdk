@@ -240,10 +240,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     "whitelabel_logo_light_enabled" to (web3AuthOption.whiteLabel?.logoLight != null),
                     "whitelabel_logo_dark_enabled" to (web3AuthOption.whiteLabel?.logoDark != null),
                     "whitelabel_theme_mode" to (web3AuthOption.whiteLabel?.theme),
-                    "modal_auth_connector_login_methods" to listOf(
-                        "email_passwordless",
-                        "sms_passwordless"
-                    ),
                     "ui_login_methods_order" to listOf(
                         "google",
                         "twitter",
@@ -289,7 +285,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 AnalyticsManager.trackEvent(
                     AnalyticsEvents.SDK_INITIALIZATION_FAILED,
                     mutableMapOf<String, Any>(
-                        "integration_type" to "android",
+                        "integration_type" to AnalyticsSdkType.ANDROID,
                         "dapp_url" to "this.loginParams?.dappUrl.toString()",
                         "duration" to System.currentTimeMillis() - startTime,
                         "error_message" to "Fetch project config API error. ${err.message}"
@@ -768,7 +764,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
     fun manageMFA(loginParams: LoginParams? = null): CompletableFuture<Boolean> {
         actionType = "manage_mfa"
         AnalyticsManager.trackEvent(
-            AnalyticsEvents.MFA_MANAGEMENT_SELECTED,
+            AnalyticsEvents.MFA_MANAGEMENT_STARTED,
             mutableMapOf<String, Any>(
                 "integration_type" to "android",
                 "dapp_url" to this.loginParams?.dappUrl.toString(),

@@ -9,7 +9,7 @@ object AnalyticsEvents {
     const val MFA_ENABLEMENT_STARTED = "MFA Enablement Started"
     const val MFA_ENABLEMENT_COMPLETED = "MFA Enablement Completed"
     const val MFA_ENABLEMENT_FAILED = "MFA Enablement Failed"
-    const val MFA_MANAGEMENT_SELECTED = "MFA Management Selected"
+    const val MFA_MANAGEMENT_STARTED = "MFA Management Started"
     const val MFA_MANAGEMENT_FAILED = "MFA Management Failed"
     const val MFA_MANAGEMENT_COMPLETED = "MFA Management Completed"
     const val WALLET_UI_CLICKED = "Wallet UI Clicked"
