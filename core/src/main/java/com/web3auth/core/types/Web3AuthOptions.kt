@@ -28,7 +28,7 @@ data class Web3AuthOptions(
     @Keep val web3AuthNetwork: Web3AuthNetwork,
     @Keep val useSFAKey: Boolean? = false,
     @Keep val walletServicesConfig: WalletServicesConfig? = null,
-    @Keep val mfaSettings: MfaSettings? = null,
+    @Keep var mfaSettings: MfaSettings? = null,
 ) {
     init {
         if (dashboardUrl == null) {

@@ -24,6 +24,7 @@ data class ProjectConfigResponse(
     @Keep val walletConnectProjectId: String?,
     @Keep val whitelabel: WhiteLabelData? = null,
     @Keep val teamId: Int? = null,
+    @Keep val mfaSettings: MfaSettings? = null
 )
 
 @Keep

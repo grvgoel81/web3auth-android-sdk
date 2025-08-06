@@ -231,32 +231,16 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         //fetch project config
         fetchProjectConfig().whenComplete { _, err ->
             if (err == null) {
+                val chainIds = web3AuthOption.chains?.chainId?.let { arrayOf(it) } ?: emptyArray()
                 val properties = mutableMapOf(
-                    "chain_ids" to listOf("eip155", "solana", "other"),
+                    "chain_ids" to chainIds,
+                    "chain_nameSpaces" to listOf("eip155", "solana", "other"),
                     "logging_enabled" to web3AuthOption.enableLogging,
                     "auth_build_env" to web3AuthOption.authBuildEnv,
-                    "auth_ux_mode" to "popup",
-                    "auth_mfa_settings" to emptyList<String>(),
+                    "auth_mfa_settings" to web3AuthOption.mfaSettings,
                     "whitelabel_logo_light_enabled" to (web3AuthOption.whiteLabel?.logoLight != null),
                     "whitelabel_logo_dark_enabled" to (web3AuthOption.whiteLabel?.logoDark != null),
                     "whitelabel_theme_mode" to (web3AuthOption.whiteLabel?.theme),
-                    "ui_login_methods_order" to listOf(
-                        "google",
-                        "twitter",
-                        "facebook",
-                        "discord",
-                        "farcaster",
-                        "apple",
-                        "github",
-                        "reddit",
-                        "line",
-                        "kakao",
-                        "linkedin",
-                        "twitch",
-                        "wechat",
-                        "email_passwordless",
-                        "sms_passwordless"
-                    ),
                     "duration" to System.currentTimeMillis() - startTime,
                     "integration_type" to "android",
                     "dapp_url" to this.loginParams?.dappUrl,
@@ -485,7 +469,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             "dapp_url" to loginParams.dappUrl.toString(),
             "chain_id" to web3AuthOption.defaultChainId.toString(),
             "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
-            "auth_ux_mode" to "popup",
         )
 
         if (loginParams.idToken.isNullOrEmpty()) {
@@ -892,6 +875,9 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     }
                     web3AuthOption.authConnectionConfig =
                         (web3AuthOption.authConnectionConfig.orEmpty() + projectConfigResponse?.embeddedWalletAuth.orEmpty())
+                    web3AuthOption.mfaSettings =
+                        web3AuthOption.mfaSettings?.merge(projectConfigResponse?.mfaSettings)
+                            ?: projectConfigResponse?.mfaSettings
                     projectConfigCompletableFuture.complete(true)
                 } else {
                     projectConfigCompletableFuture.completeExceptionally(
@@ -1256,7 +1242,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             "dapp_url" to loginParams?.dappUrl.toString(),
             "chain_id" to web3AuthOption.defaultChainId.toString(),
             "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
-            "auth_ux_mode" to "popup",
             "duration" to System.currentTimeMillis() - startTime,
             "error_message" to (error?.name ?: "Unknown Error")
         )
