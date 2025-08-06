@@ -596,6 +596,26 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                         web3AuthResponse = response
                         SessionManager.saveSessionIdToStorage(result)
                         sessionManager.setSessionId(result)
+                        val analyticsProps = mutableMapOf<String, Any>(
+                            "connector" to "auth",
+                            "auth_connection" to loginParams?.authConnection.toString(),
+                            "auth_connection_id" to loginParams?.authConnectionId.toString(),
+                            "group_auth_connection_id" to loginParams?.groupedAuthConnectionId.toString(),
+                            "chain_id" to web3AuthOption.defaultChainId.toString(),
+                            "dapp_url" to loginParams?.dappUrl.toString(),
+                            "chain_id" to web3AuthOption.defaultChainId.toString(),
+                            "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
+                            "integration_type" to "android",
+                            "is_mfa_enabled" to (actionType == "enable_mfa"),
+                            "is_sfa" to true
+                        )
+                        val properties =
+                            analyticsProps + mapOf("duration" to System.currentTimeMillis() - startTime)
+
+                        AnalyticsManager.trackEvent(
+                            AnalyticsEvents.CONNECTION_COMPLETED,
+                            properties
+                        )
                         if (::loginCompletableFuture.isInitialized)
                             loginCompletableFuture.complete(web3AuthResponse)
                     }
@@ -1262,6 +1282,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
             "integration_type" to "android",
             "is_mfa_enabled" to (actionType == "enable_mfa"),
+            "is_sfa" to false
         )
         val properties =
             analyticsProps + mapOf("duration" to System.currentTimeMillis() - startTime)
