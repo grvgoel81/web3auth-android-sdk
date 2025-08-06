@@ -598,11 +598,11 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                         sessionManager.setSessionId(result)
                         val analyticsProps = mutableMapOf<String, Any>(
                             "connector" to "auth",
-                            "auth_connection" to loginParams?.authConnection.toString(),
-                            "auth_connection_id" to loginParams?.authConnectionId.toString(),
-                            "group_auth_connection_id" to loginParams?.groupedAuthConnectionId.toString(),
+                            "auth_connection" to loginParams.authConnection.toString(),
+                            "auth_connection_id" to loginParams.authConnectionId.toString(),
+                            "group_auth_connection_id" to loginParams.groupedAuthConnectionId.toString(),
                             "chain_id" to web3AuthOption.defaultChainId.toString(),
-                            "dapp_url" to loginParams?.dappUrl.toString(),
+                            "dapp_url" to loginParams.dappUrl.toString(),
                             "chain_id" to web3AuthOption.defaultChainId.toString(),
                             "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
                             "integration_type" to "android",
