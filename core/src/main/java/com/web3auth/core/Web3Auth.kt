@@ -87,7 +87,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         AnalyticsManager.setGlobalProperties(
             mapOf(
                 "sdk_name" to web3AuthOptions.getSdkName(),
-                "sdk_version" to AnalyticsEvents.SDK_VERSION,
+                "sdk_version" to web3AuthOptions.getSdkVersion(),
                 "web3auth_client_id" to web3AuthOptions.clientId,
                 "web3auth_network" to web3AuthOptions.web3AuthNetwork,
             )
@@ -855,7 +855,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     AnalyticsManager.setGlobalProperties(
                         mapOf(
                             "sdk_name" to web3AuthOption.getSdkName(),
-                            "sdk_version" to AnalyticsEvents.SDK_VERSION,
+                            "sdk_version" to web3AuthOption.getSdkVersion(),
                             "web3auth_client_id" to web3AuthOption.clientId,
                             "web3auth_network" to web3AuthOption.web3AuthNetwork,
                             "team_id" to projectConfigResponse?.teamId.toString(),

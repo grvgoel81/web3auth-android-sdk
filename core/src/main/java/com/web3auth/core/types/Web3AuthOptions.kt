@@ -2,6 +2,7 @@ package com.web3auth.core.types
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
+import com.web3auth.core.analytics.AnalyticsEvents
 import com.web3auth.core.analytics.AnalyticsSdkType
 import org.torusresearch.fetchnodedetails.types.Web3AuthNetwork
 
@@ -34,11 +35,20 @@ data class Web3AuthOptions(
 
     @Transient
     private var isFlutterAnalytics: Boolean? = false
-    fun setIsFlutterAnalytics(analytics: Boolean?) {
+    private var sdkVersion: String? = null
+    fun setFlutterAnalytics(analytics: Boolean?, sdkVersion: String? = null) {
         this.isFlutterAnalytics = analytics ?: false
+        this.sdkVersion = sdkVersion
     }
 
-    fun isFlutterAnalytics(): Boolean? = isFlutterAnalytics
+    fun getFlutterAnalytics(): Boolean? = isFlutterAnalytics
+    fun getSdkVersion(): String {
+        return if (sdkVersion.isNullOrEmpty()) {
+            AnalyticsEvents.ANDROID_SDK_VERSION // android sdk version
+        } else {
+            sdkVersion ?: "unknown" // flutter sdk version
+        }
+    }
 
     fun getSdkName(): String {
         return if (isFlutterAnalytics == true) AnalyticsSdkType.FLUTTER else AnalyticsSdkType.ANDROID
