@@ -9,7 +9,7 @@ import com.web3auth.core.BuildConfig
 internal object AnalyticsManager {
 
     private const val SEGMENT_WRITE_KEY =
-        SegmentKeys.SEGMENT_WRITE_KEY // Use (SEGMENT_WRITE_KEY) in production builds and (SEGMENT_WRITE_KEY_DEV) in development/testing builds
+        SegmentKeys.SEGMENT_WRITE_KEY_DEV // Use (SEGMENT_WRITE_KEY) in production builds and (SEGMENT_WRITE_KEY_DEV) in development/testing builds
     private var analytics: Analytics? = null
     private var isInitialized = false
 
