@@ -2,6 +2,7 @@ package com.web3auth.core.types
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
+import com.web3auth.core.analytics.AnalyticsSdkType
 import org.torusresearch.fetchnodedetails.types.Web3AuthNetwork
 
 @Keep
@@ -30,6 +31,19 @@ data class Web3AuthOptions(
     @Keep val walletServicesConfig: WalletServicesConfig? = null,
     @Keep var mfaSettings: MfaSettings? = null,
 ) {
+
+    @Transient
+    private var isFlutterAnalytics: Boolean? = false
+    fun setIsFlutterAnalytics(analytics: Boolean?) {
+        this.isFlutterAnalytics = analytics ?: false
+    }
+
+    fun isFlutterAnalytics(): Boolean? = isFlutterAnalytics
+
+    fun getSdkName(): String {
+        return if (isFlutterAnalytics == true) AnalyticsSdkType.FLUTTER else AnalyticsSdkType.ANDROID
+    }
+
     init {
         if (dashboardUrl == null) {
             dashboardUrl = getDashboardUrl(authBuildEnv)

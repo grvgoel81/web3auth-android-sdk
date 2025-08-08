@@ -26,6 +26,7 @@ object AnalyticsEvents {
 
 object AnalyticsSdkType {
     const val ANDROID = "android"
+    const val FLUTTER = "flutter"
 }
 
 object SegmentKeys {

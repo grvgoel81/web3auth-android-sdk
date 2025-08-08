@@ -12,7 +12,6 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.web3auth.core.analytics.AnalyticsEvents
 import com.web3auth.core.analytics.AnalyticsManager
-import com.web3auth.core.analytics.AnalyticsSdkType
 import com.web3auth.core.api.ApiHelper
 import com.web3auth.core.api.ApiService
 import com.web3auth.core.keystore.IS_SFA
@@ -87,7 +86,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         )
         AnalyticsManager.setGlobalProperties(
             mapOf(
-                "sdk_name" to AnalyticsSdkType.ANDROID,
+                "sdk_name" to web3AuthOptions.getSdkName(),
                 "sdk_version" to AnalyticsEvents.SDK_VERSION,
                 "web3auth_client_id" to web3AuthOptions.clientId,
                 "web3auth_network" to web3AuthOptions.web3AuthNetwork,
@@ -242,7 +241,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     "whitelabel_logo_dark_enabled" to (web3AuthOption.whiteLabel?.logoDark != null),
                     "whitelabel_theme_mode" to (web3AuthOption.whiteLabel?.theme),
                     "duration" to System.currentTimeMillis() - startTime,
-                    "integration_type" to "android",
+                    "integration_type" to web3AuthOption.getSdkName(),
                     "dapp_url" to this.loginParams?.dappUrl,
                 )
 
@@ -269,7 +268,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 AnalyticsManager.trackEvent(
                     AnalyticsEvents.SDK_INITIALIZATION_FAILED,
                     mutableMapOf<String, Any>(
-                        "integration_type" to AnalyticsSdkType.ANDROID,
+                        "integration_type" to web3AuthOption.getSdkName(),
                         "dapp_url" to "this.loginParams?.dappUrl.toString()",
                         "duration" to System.currentTimeMillis() - startTime,
                         "error_message" to "Fetch project config API error. ${err.message}"
@@ -321,7 +320,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 AnalyticsManager.trackEvent(
                     AnalyticsEvents.MFA_MANAGEMENT_FAILED,
                     mutableMapOf<String, Any>(
-                        "integration_type" to "android",
+                        "integration_type" to web3AuthOption.getSdkName(),
                         "dapp_url" to this.loginParams?.dappUrl.toString(),
                         "connector" to "auth",
                         "duration" to System.currentTimeMillis() - startTime,
@@ -588,7 +587,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                             "dapp_url" to loginParams.dappUrl.toString(),
                             "chain_id" to web3AuthOption.defaultChainId.toString(),
                             "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
-                            "integration_type" to "android",
+                            "integration_type" to web3AuthOption.getSdkName(),
                             "is_mfa_enabled" to (actionType == "enable_mfa"),
                             "is_sfa" to true
                         )
@@ -743,7 +742,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         AnalyticsManager.trackEvent(
             AnalyticsEvents.MFA_ENABLEMENT_STARTED,
             mutableMapOf<String, Any>(
-                "integration_type" to "android",
+                "integration_type" to web3AuthOption.getSdkName(),
                 "dapp_url" to this.loginParams?.dappUrl.toString(),
                 "connector" to "auth",
                 "duration" to System.currentTimeMillis() - startTime,
@@ -769,7 +768,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         AnalyticsManager.trackEvent(
             AnalyticsEvents.MFA_MANAGEMENT_STARTED,
             mutableMapOf<String, Any>(
-                "integration_type" to "android",
+                "integration_type" to web3AuthOption.getSdkName(),
                 "dapp_url" to this.loginParams?.dappUrl.toString(),
                 "connector" to "auth"
             )
@@ -855,7 +854,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                     // Set global properties for analytics after fetching project config
                     AnalyticsManager.setGlobalProperties(
                         mapOf(
-                            "sdk_name" to AnalyticsSdkType.ANDROID,
+                            "sdk_name" to web3AuthOption.getSdkName(),
                             "sdk_version" to AnalyticsEvents.SDK_VERSION,
                             "web3auth_client_id" to web3AuthOption.clientId,
                             "web3auth_network" to web3AuthOption.web3AuthNetwork,
@@ -929,7 +928,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         AnalyticsManager.trackEvent(
             AnalyticsEvents.WALLET_UI_CLICKED,
             mutableMapOf<String, Any>(
-                "integration_type" to "android",
+                "integration_type" to web3AuthOption.getSdkName(),
                 "dapp_url" to this.loginParams?.dappUrl.toString(),
             )
         )
@@ -1003,7 +1002,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             AnalyticsManager.trackEvent(
                 AnalyticsEvents.WALLET_SERVICES_FAILED,
                 mutableMapOf<String, Any>(
-                    "integration_type" to "android",
+                    "integration_type" to web3AuthOption.getSdkName(),
                     "dapp_url" to this.loginParams?.dappUrl.toString(),
                     "duration" to System.currentTimeMillis() - startTime,
                     "error" to "Wallet Services Error: Session ID is not found. Please login first."
@@ -1265,7 +1264,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
             "dapp_url" to loginParams?.dappUrl.toString(),
             "chain_id" to web3AuthOption.defaultChainId.toString(),
             "chains" to (web3AuthOption.chains?.toString() ?: "[]"),
-            "integration_type" to "android",
+            "integration_type" to web3AuthOption.getSdkName(),
             "is_mfa_enabled" to (actionType == "enable_mfa"),
             "is_sfa" to false
         )
