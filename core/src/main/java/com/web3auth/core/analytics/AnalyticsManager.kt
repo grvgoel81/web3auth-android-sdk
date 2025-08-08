@@ -9,7 +9,7 @@ import com.web3auth.core.BuildConfig
 internal object AnalyticsManager {
 
     private const val SEGMENT_WRITE_KEY =
-        SegmentKeys.SEGMENT_WRITE_KEY_DEV // Use (SEGMENT_WRITE_KEY) in production builds and (SEGMENT_WRITE_KEY_DEV) in development/testing builds
+        SegmentKeys.SEGMENT_WRITE_KEY // Use (SEGMENT_WRITE_KEY) in production builds and (SEGMENT_WRITE_KEY_DEV) in development/testing builds
     private var analytics: Analytics? = null
     private var isInitialized = false
 
@@ -33,7 +33,7 @@ internal object AnalyticsManager {
 
     fun trackEvent(eventName: String, properties: Map<String, Any?>? = null) {
         if (!isInitialized) return
-        //if (isSkipped()) return
+        if (isSkipped()) return
 
         val combinedProps = Properties().apply {
             globalProperties.forEach { (k, v) -> putValue(k, v) }
@@ -45,7 +45,7 @@ internal object AnalyticsManager {
 
     fun identify(userId: String, traits: Map<String, Any>? = null) {
         if (!isInitialized) return
-        //if (isSkipped()) return
+        if (isSkipped()) return
 
         val traitsObj = traits?.let {
             Traits().apply {
