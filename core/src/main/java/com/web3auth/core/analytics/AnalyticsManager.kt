@@ -33,7 +33,7 @@ internal object AnalyticsManager {
 
     fun trackEvent(eventName: String, properties: Map<String, Any?>? = null) {
         if (!isInitialized) return
-        if (isSkipped()) return
+        //if (isSkipped()) return
 
         val combinedProps = Properties().apply {
             globalProperties.forEach { (k, v) -> putValue(k, v) }
@@ -45,7 +45,7 @@ internal object AnalyticsManager {
 
     fun identify(userId: String, traits: Map<String, Any>? = null) {
         if (!isInitialized) return
-        if (isSkipped()) return
+        //if (isSkipped()) return
 
         val traitsObj = traits?.let {
             Traits().apply {
