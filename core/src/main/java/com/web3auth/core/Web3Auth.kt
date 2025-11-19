@@ -662,7 +662,17 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         val isUpgraded = retrieveSharesResponse.metadata?.isUpgraded
 
         if (isUpgraded == true) {
-            throw Exception(Web3AuthError.getError(ErrorCode.USER_ALREADY_ENABLED_MFA))
+            if (!loginParams.loginHint.isNullOrEmpty()) {
+                val updatedExtraLoginOptions = loginParams.extraLoginOptions?.copy(
+                    login_hint = loginParams.loginHint
+                ) ?: ExtraLoginOptions(login_hint = loginParams.loginHint)
+
+                loginParams.copy(extraLoginOptions = updatedExtraLoginOptions)
+            } else {
+                loginParams
+            }.also {
+                login(it) // PnP login
+            }
         }
 
         return retrieveSharesResponse
