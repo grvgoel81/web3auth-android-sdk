@@ -490,36 +490,60 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 login(it) // PnP login
             }
         } else {
-            SharedPrefsHelper.putBoolean(IS_SFA, true)
-            AnalyticsManager.trackEvent(
-                AnalyticsEvents.CONNECTION_STARTED,
-                analyticsProps + mutableMapOf<String, Any>(
-                    "is_sfa" to true,
-                )
+            val userId = getUserIdFromJWT(loginParams.idToken.toString())
+            val nodeDetails: NodeDetails =
+                nodeDetailManager.getNodeDetails(loginParams.authConnectionId, userId)
+                    .get()
+            val torusPublicKey = torusUtils.getPublicAddress(
+                nodeDetails.torusNodeEndpoints,
+                loginParams.authConnectionId.toString(), userId.toString(), null
             )
-            loginParams.groupedAuthConnectionId?.let {
-                if (it.isNullOrEmpty()) {
-                    connect(loginParams, baseContext)
+            if (torusPublicKey.metadata.isUpgraded) {
+                // PnP user
+                if (!loginParams.loginHint.isNullOrEmpty()) {
+                    val updatedExtraLoginOptions = loginParams.extraLoginOptions?.copy(
+                        login_hint = loginParams.loginHint
+                    ) ?: ExtraLoginOptions(login_hint = loginParams.loginHint)
+
+                    loginParams.copy(extraLoginOptions = updatedExtraLoginOptions)
                 } else {
-                    val _loginParams = LoginParams(
-                        AuthConnection.CUSTOM,
-                        authConnectionId = loginParams.groupedAuthConnectionId,
-                        idToken = loginParams.idToken
-                    )
-                    val subVerifierInfoArray = arrayOf(
-                        Web3AuthSubVerifierInfo(
-                            loginParams.authConnectionId.toString(),
-                            idToken = loginParams.idToken.toString()
-                        )
-                    )
-                    connect(
-                        _loginParams,
-                        baseContext,
-                        subVerifierInfoArray = subVerifierInfoArray
-                    ) // SFA login
+                    loginParams
+                }.also {
+                    login(it) // PnP login
                 }
+            } else {
+                // SFA user
+                SharedPrefsHelper.putBoolean(IS_SFA, true)
+                AnalyticsManager.trackEvent(
+                    AnalyticsEvents.CONNECTION_STARTED,
+                    analyticsProps + mutableMapOf<String, Any>(
+                        "is_sfa" to true,
+                    )
+                )
+                loginParams.groupedAuthConnectionId?.let {
+                    if (it.isNullOrEmpty()) {
+                        connect(loginParams, baseContext)
+                    } else {
+                        val _loginParams = LoginParams(
+                            AuthConnection.CUSTOM,
+                            authConnectionId = loginParams.groupedAuthConnectionId,
+                            idToken = loginParams.idToken
+                        )
+                        val subVerifierInfoArray = arrayOf(
+                            Web3AuthSubVerifierInfo(
+                                loginParams.authConnectionId.toString(),
+                                idToken = loginParams.idToken.toString()
+                            )
+                        )
+                        connect(
+                            _loginParams,
+                            baseContext,
+                            subVerifierInfoArray = subVerifierInfoArray
+                        ) // SFA login
+                    }
+                }
+                connect(loginParams, baseContext) // SFA login
             }
-            connect(loginParams, baseContext) // SFA login
         }
 
         loginCompletableFuture = CompletableFuture()
@@ -662,17 +686,7 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         val isUpgraded = retrieveSharesResponse.metadata?.isUpgraded
 
         if (isUpgraded == true) {
-            if (!loginParams.loginHint.isNullOrEmpty()) {
-                val updatedExtraLoginOptions = loginParams.extraLoginOptions?.copy(
-                    login_hint = loginParams.loginHint
-                ) ?: ExtraLoginOptions(login_hint = loginParams.loginHint)
-
-                loginParams.copy(extraLoginOptions = updatedExtraLoginOptions)
-            } else {
-                loginParams
-            }.also {
-                login(it) // PnP login
-            }
+            throw Exception(Web3AuthError.getError(ErrorCode.USER_ALREADY_ENABLED_MFA))
         }
 
         return retrieveSharesResponse
