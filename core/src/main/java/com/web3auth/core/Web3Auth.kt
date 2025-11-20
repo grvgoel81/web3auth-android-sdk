@@ -200,7 +200,11 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
         val loginIdCf = getLoginId(sessionId, paramsString)
         loginIdCf.whenComplete { loginId, error ->
             if (error == null) {
-                val jsonObject = mapOf("loginId" to loginId)
+                val jsonObject = mutableMapOf("loginId" to loginId)
+                val isSFAValue = SharedPrefsHelper.getBoolean(IS_SFA)
+                if (isSFAValue) {
+                    jsonObject["namespace"] = "sfa"
+                }
 
                 val hash = "b64Params=" + gson.toJson(jsonObject).toByteArray(Charsets.UTF_8)
                     .toBase64URLString()
@@ -490,6 +494,13 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 login(it) // PnP login
             }
         } else {
+            SharedPrefsHelper.putBoolean(IS_SFA, true)
+            AnalyticsManager.trackEvent(
+                AnalyticsEvents.CONNECTION_STARTED,
+                analyticsProps + mutableMapOf<String, Any>(
+                    "is_sfa" to true,
+                )
+            )
             val userId = getUserIdFromJWT(loginParams.idToken.toString())
             val nodeDetails: NodeDetails =
                 nodeDetailManager.getNodeDetails(loginParams.authConnectionId, userId)
@@ -513,13 +524,6 @@ class Web3Auth(web3AuthOptions: Web3AuthOptions, context: Context) : WebViewResu
                 }
             } else {
                 // SFA user
-                SharedPrefsHelper.putBoolean(IS_SFA, true)
-                AnalyticsManager.trackEvent(
-                    AnalyticsEvents.CONNECTION_STARTED,
-                    analyticsProps + mutableMapOf<String, Any>(
-                        "is_sfa" to true,
-                    )
-                )
                 loginParams.groupedAuthConnectionId?.let {
                     if (it.isNullOrEmpty()) {
                         connect(loginParams, baseContext)
